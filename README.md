@@ -1,4 +1,4 @@
-# Trend analysis of PubMed abstracts for microbial ecology and ecology informatic fields
+# Trend analysis of PubMed abstracts for microbial ecology and ecology informatics
 
 This analysis aims to elucidate the trends of research focus and disciplines intersections. Trends will be found using specific keyword search in the PubMed corpus. When a keyword is found in an article the article ID (PMID) and year of publication are saved. Then we search the co-occurences of keywords in the same article to infer when these keywords - research topics - started to combine.
 
@@ -8,8 +8,7 @@ The data used for this analysisa are the abstracts and article information of th
 
 The output of the ftp method are multiple xml files which then were transformed to tab seperated files. All these files are zipped with the ``` gzip command```. Each .tsv.gz file contains 6 fields with the following structure:
 
-| PMID DOI |  Authors | Journal.volume:pages  | year  | title | Abstract  |
-
+ | PMID DOI |  Authors | Journal.volume:pages  | year  | title | Abstract  |
 
 ## Keywords
 
