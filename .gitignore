@@ -1,0 +1,2 @@
+# ignore all tsv files in the repository
+*.tsv 
