@@ -9,7 +9,7 @@ The data used for this analysisa are the abstracts and article information of th
 The output of the ftp method are multiple xml files which then were transformed to tab seperated files. All these files are zipped with the ``` gzip command```. Each .tsv.gz file contains 6 fields with the following structure:
 
  | PMID DOI |  Authors | Journal.volume:pages  | year  | title | Abstract  |
-
+ | --- | --- | --- | --- | --- | --- |
 ## Keywords
 
 A .txt file with the following keywords is read from the bash script
