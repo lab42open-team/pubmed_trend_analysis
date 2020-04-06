@@ -1,0 +1,362 @@
+rowname	colname	count
+biodiversity	biodiversity	20990
+biodiversity	biogeochemical cycles	69
+biodiversity	biogeochemistry	36
+biodiversity	data mining	16
+biodiversity	ecology	1942
+biodiversity	ecosystem	3927
+biodiversity	ecosystem function	369
+biodiversity	ecosystem service	192
+biodiversity	environment	1946
+biodiversity	fba	0
+biodiversity	flux	77
+biodiversity	flux balance analysis	0
+biodiversity	metabolic process	2
+biodiversity	metabolism	251
+biodiversity	metabolome	16
+biodiversity	microbial ecology	97
+biodiversity	microbiome	223
+biodiversity	omics	46
+biodiversity	text mining	7
+biogeochemical cycles	biodiversity	69
+biogeochemical cycles	biogeochemical cycles	1171
+biogeochemical cycles	biogeochemistry	46
+biogeochemical cycles	data mining	0
+biogeochemical cycles	ecology	102
+biogeochemical cycles	ecosystem	250
+biogeochemical cycles	ecosystem function	26
+biogeochemical cycles	ecosystem service	4
+biogeochemical cycles	environment	178
+biogeochemical cycles	fba	0
+biogeochemical cycles	flux	48
+biogeochemical cycles	flux balance analysis	0
+biogeochemical cycles	metabolic process	1
+biogeochemical cycles	metabolism	99
+biogeochemical cycles	metabolome	1
+biogeochemical cycles	microbial ecology	28
+biogeochemical cycles	microbiome	21
+biogeochemical cycles	omics	10
+biogeochemical cycles	text mining	0
+biogeochemistry	biodiversity	36
+biogeochemistry	biogeochemical cycles	46
+biogeochemistry	biogeochemistry	1360
+biogeochemistry	data mining	0
+biogeochemistry	ecology	170
+biogeochemistry	ecosystem	245
+biogeochemistry	ecosystem function	21
+biogeochemistry	ecosystem service	1
+biogeochemistry	environment	205
+biogeochemistry	fba	0
+biogeochemistry	flux	71
+biogeochemistry	flux balance analysis	0
+biogeochemistry	metabolic process	1
+biogeochemistry	metabolism	74
+biogeochemistry	metabolome	1
+biogeochemistry	microbial ecology	46
+biogeochemistry	microbiome	10
+biogeochemistry	omics	5
+biogeochemistry	text mining	0
+data mining	biodiversity	16
+data mining	biogeochemical cycles	0
+data mining	biogeochemistry	0
+data mining	data mining	6668
+data mining	ecology	20
+data mining	ecosystem	18
+data mining	ecosystem function	1
+data mining	ecosystem service	0
+data mining	environment	258
+data mining	fba	0
+data mining	flux	9
+data mining	flux balance analysis	1
+data mining	metabolic process	7
+data mining	metabolism	219
+data mining	metabolome	21
+data mining	microbial ecology	1
+data mining	microbiome	9
+data mining	omics	102
+data mining	text mining	63
+ecology	biodiversity	1942
+ecology	biogeochemical cycles	102
+ecology	biogeochemistry	170
+ecology	data mining	20
+ecology	ecology	39786
+ecology	ecosystem	2915
+ecology	ecosystem function	253
+ecology	ecosystem service	45
+ecology	environment	4355
+ecology	fba	2
+ecology	flux	236
+ecology	flux balance analysis	4
+ecology	metabolic process	7
+ecology	metabolism	993
+ecology	metabolome	41
+ecology	microbial ecology	2713
+ecology	microbiome	655
+ecology	omics	123
+ecology	text mining	2
+ecosystem	biodiversity	3927
+ecosystem	biogeochemical cycles	250
+ecosystem	biogeochemistry	245
+ecosystem	data mining	18
+ecosystem	ecology	2915
+ecosystem	ecosystem	34308
+ecosystem	ecosystem function	1433
+ecosystem	ecosystem service	820
+ecosystem	environment	4575
+ecosystem	fba	6
+ecosystem	flux	995
+ecosystem	flux balance analysis	13
+ecosystem	metabolic process	10
+ecosystem	metabolism	1096
+ecosystem	metabolome	45
+ecosystem	microbial ecology	226
+ecosystem	microbiome	667
+ecosystem	omics	122
+ecosystem	text mining	5
+ecosystem function	biodiversity	369
+ecosystem function	biogeochemical cycles	26
+ecosystem function	biogeochemistry	21
+ecosystem function	data mining	1
+ecosystem function	ecology	253
+ecosystem function	ecosystem	1433
+ecosystem function	ecosystem function	1433
+ecosystem function	ecosystem service	22
+ecosystem function	environment	147
+ecosystem function	fba	0
+ecosystem function	flux	36
+ecosystem function	flux balance analysis	1
+ecosystem function	metabolic process	0
+ecosystem function	metabolism	51
+ecosystem function	metabolome	0
+ecosystem function	microbial ecology	17
+ecosystem function	microbiome	16
+ecosystem function	omics	4
+ecosystem function	text mining	0
+ecosystem service	biodiversity	192
+ecosystem service	biogeochemical cycles	4
+ecosystem service	biogeochemistry	1
+ecosystem service	data mining	0
+ecosystem service	ecology	45
+ecosystem service	ecosystem	820
+ecosystem service	ecosystem function	22
+ecosystem service	ecosystem service	820
+ecosystem service	environment	101
+ecosystem service	fba	0
+ecosystem service	flux	7
+ecosystem service	flux balance analysis	0
+ecosystem service	metabolic process	0
+ecosystem service	metabolism	4
+ecosystem service	metabolome	0
+ecosystem service	microbial ecology	1
+ecosystem service	microbiome	4
+ecosystem service	omics	2
+ecosystem service	text mining	0
+environment	biodiversity	1946
+environment	biogeochemical cycles	178
+environment	biogeochemistry	205
+environment	data mining	258
+environment	ecology	4355
+environment	ecosystem	4575
+environment	ecosystem function	147
+environment	ecosystem service	101
+environment	environment	441378
+environment	fba	40
+environment	flux	2379
+environment	flux balance analysis	51
+environment	metabolic process	78
+environment	metabolism	12148
+environment	metabolome	291
+environment	microbial ecology	381
+environment	microbiome	1537
+environment	omics	539
+environment	text mining	37
+fba	biodiversity	0
+fba	biogeochemical cycles	0
+fba	biogeochemistry	0
+fba	data mining	0
+fba	ecology	2
+fba	ecosystem	6
+fba	ecosystem function	0
+fba	ecosystem service	0
+fba	environment	40
+fba	fba	873
+fba	flux	262
+fba	flux balance analysis	232
+fba	metabolic process	0
+fba	metabolism	171
+fba	metabolome	1
+fba	microbial ecology	0
+fba	microbiome	1
+fba	omics	16
+fba	text mining	0
+flux	biodiversity	77
+flux	biogeochemical cycles	48
+flux	biogeochemistry	71
+flux	data mining	9
+flux	ecology	236
+flux	ecosystem	995
+flux	ecosystem function	36
+flux	ecosystem service	7
+flux	environment	2379
+flux	fba	262
+flux	flux	72671
+flux	flux balance analysis	643
+flux	metabolic process	27
+flux	metabolism	8794
+flux	metabolome	149
+flux	microbial ecology	27
+flux	microbiome	36
+flux	omics	154
+flux	text mining	1
+flux balance analysis	biodiversity	0
+flux balance analysis	biogeochemical cycles	0
+flux balance analysis	biogeochemistry	0
+flux balance analysis	data mining	1
+flux balance analysis	ecology	4
+flux balance analysis	ecosystem	13
+flux balance analysis	ecosystem function	1
+flux balance analysis	ecosystem service	0
+flux balance analysis	environment	51
+flux balance analysis	fba	232
+flux balance analysis	flux	643
+flux balance analysis	flux balance analysis	643
+flux balance analysis	metabolic process	0
+flux balance analysis	metabolism	346
+flux balance analysis	metabolome	5
+flux balance analysis	microbial ecology	1
+flux balance analysis	microbiome	3
+flux balance analysis	omics	30
+flux balance analysis	text mining	0
+metabolic process	biodiversity	2
+metabolic process	biogeochemical cycles	1
+metabolic process	biogeochemistry	1
+metabolic process	data mining	7
+metabolic process	ecology	7
+metabolic process	ecosystem	10
+metabolic process	ecosystem function	0
+metabolic process	ecosystem service	0
+metabolic process	environment	78
+metabolic process	fba	0
+metabolic process	flux	27
+metabolic process	flux balance analysis	0
+metabolic process	metabolic process	2064
+metabolic process	metabolism	609
+metabolic process	metabolome	4
+metabolic process	microbial ecology	1
+metabolic process	microbiome	4
+metabolic process	omics	9
+metabolic process	text mining	2
+metabolism	biodiversity	251
+metabolism	biogeochemical cycles	99
+metabolism	biogeochemistry	74
+metabolism	data mining	219
+metabolism	ecology	993
+metabolism	ecosystem	1096
+metabolism	ecosystem function	51
+metabolism	ecosystem service	4
+metabolism	environment	12148
+metabolism	fba	171
+metabolism	flux	8794
+metabolism	flux balance analysis	346
+metabolism	metabolic process	609
+metabolism	metabolism	545677
+metabolism	metabolome	1942
+metabolism	microbial ecology	196
+metabolism	microbiome	1781
+metabolism	omics	1091
+metabolism	text mining	26
+metabolome	biodiversity	16
+metabolome	biogeochemical cycles	1
+metabolome	biogeochemistry	1
+metabolome	data mining	21
+metabolome	ecology	41
+metabolome	ecosystem	45
+metabolome	ecosystem function	0
+metabolome	ecosystem service	0
+metabolome	environment	291
+metabolome	fba	1
+metabolome	flux	149
+metabolome	flux balance analysis	5
+metabolome	metabolic process	4
+metabolome	metabolism	1942
+metabolome	metabolome	5297
+metabolome	microbial ecology	10
+metabolome	microbiome	352
+metabolome	omics	392
+metabolome	text mining	4
+microbial ecology	biodiversity	97
+microbial ecology	biogeochemical cycles	28
+microbial ecology	biogeochemistry	46
+microbial ecology	data mining	1
+microbial ecology	ecology	2713
+microbial ecology	ecosystem	226
+microbial ecology	ecosystem function	17
+microbial ecology	ecosystem service	1
+microbial ecology	environment	381
+microbial ecology	fba	0
+microbial ecology	flux	27
+microbial ecology	flux balance analysis	1
+microbial ecology	metabolic process	1
+microbial ecology	metabolism	196
+microbial ecology	metabolome	10
+microbial ecology	microbial ecology	2713
+microbial ecology	microbiome	262
+microbial ecology	omics	33
+microbial ecology	text mining	1
+microbiome	biodiversity	223
+microbiome	biogeochemical cycles	21
+microbiome	biogeochemistry	10
+microbiome	data mining	9
+microbiome	ecology	655
+microbiome	ecosystem	667
+microbiome	ecosystem function	16
+microbiome	ecosystem service	4
+microbiome	environment	1537
+microbiome	fba	1
+microbiome	flux	36
+microbiome	flux balance analysis	3
+microbiome	metabolic process	4
+microbiome	metabolism	1781
+microbiome	metabolome	352
+microbiome	microbial ecology	262
+microbiome	microbiome	15633
+microbiome	omics	251
+microbiome	text mining	3
+omics	biodiversity	46
+omics	biogeochemical cycles	10
+omics	biogeochemistry	5
+omics	data mining	102
+omics	ecology	123
+omics	ecosystem	122
+omics	ecosystem function	4
+omics	ecosystem service	2
+omics	environment	539
+omics	fba	16
+omics	flux	154
+omics	flux balance analysis	30
+omics	metabolic process	9
+omics	metabolism	1091
+omics	metabolome	392
+omics	microbial ecology	33
+omics	microbiome	251
+omics	omics	8913
+omics	text mining	20
+text mining	biodiversity	7
+text mining	biogeochemical cycles	0
+text mining	biogeochemistry	0
+text mining	data mining	63
+text mining	ecology	2
+text mining	ecosystem	5
+text mining	ecosystem function	0
+text mining	ecosystem service	0
+text mining	environment	37
+text mining	fba	0
+text mining	flux	1
+text mining	flux balance analysis	0
+text mining	metabolic process	2
+text mining	metabolism	26
+text mining	metabolome	4
+text mining	microbial ecology	1
+text mining	microbiome	3
+text mining	omics	20
+text mining	text mining	1513

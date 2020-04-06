@@ -19,7 +19,7 @@ keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,year) %>% group_by
 
 pubmed_keyword_per_year <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=counts, color=keyword), show.legend=T)+
-    scale_x_continuous(breaks=seq(1940,2020,20),limits=c(1940,2020))+
+    scale_x_continuous(breaks=seq(1940,2020,10),limits=c(1940,2020))+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
     
@@ -32,21 +32,32 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     
 ggsave("plots/pubmed_keyword_per_year_cumulative.pdf", plot = pubmed_keyword_per_year_cumulative, device = "pdf", dpi = 150)
 
-papers_multiple <- trends_pubmed %>% dplyr::distinct(PMID, keyword) %>% group_by(PMID) %>% summarise(n=n()) %>% ungroup() %>% group_by(n) %>% summarise(counts=n())
+# Heatmap
 
-write_delim(papers_multiple, "papers_multiple.txt", delim="\t")
+library(Matrix)
 
+papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
 
+papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),ncol=length(unique(papers_keywords_network$keyword)),i=as.numeric(factor(papers_keywords_network$PMID)),j=as.numeric(factor(papers_keywords_network$keyword)),x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
 
+row.names(papers_keywords_matrix) <- levels(factor(papers_keywords_network$PMID))
+colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keyword))
 
-keywords_coocurence <- trends_pubmed %>% dplyr::distinct(PMID, keyword) %>% group_by(PMID) %>% summarise(keywords_c=toString(keyword)) %>% group_by(keywords_c) %>% summarise(counts=n()) %>% filter(grepl(",",keywords_c)) %>% mutate(b=gsub(".*\\, ","",keywords_c),a=gsub("\\,.*","",keywords_c))
+keywords_heatmap <- tcrossprod(t(papers_keywords_matrix))
 
-write_delim(keywords_coocurence,"keywords_coocurence.txt",delim="\t")
+keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) # %>% filter(count>0)
 
-pubmed_keyword_coocurrence_heatmap <- ggplot(keywords_coocurence,aes(x=a,y=b,fill=counts))+
-    geom_tile()+
-    scale_fill_gradientn(colours = terrain.colors(3))+
-    scale_x_discrete(limits=unique(rev(keywords_coocurence$a)))+
+write_delim(keywords_heatmap_long, "keywords_heatmap.txt", delim="\t")
+
+keywords_heatmap_long$colname <- factor(keywords_heatmap_long$colname, level=unique(keywords_heatmap_long$colname))
+keywords_heatmap_long$rowname <- factor(keywords_heatmap_long$rowname, level=unique(keywords_heatmap_long$rowname))
+
+pubmed_keyword_coocurrence_heatmap <- ggplot(keywords_heatmap_long,aes(x=colname,y=rowname,fill=count))+
+    #geom_tile()+
+    geom_point(aes(colour = count, size =count))  +    ## geom_point for circle illusion
+    #scale_color_gradient(low = "yellow",high = "red")+       ## color of the corresponding aes
+    scale_size(range = c(1, 10))+
+    #scale_color_brewer(palette = "PuOr")+
     ggtitle("Heatmap of co-occurrence of keywords")+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
