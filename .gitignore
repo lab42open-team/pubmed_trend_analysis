@@ -1,2 +1,6 @@
-# ignore all tsv files in the repository
-*.tsv 
+# ignore all tsv and txt files in the repository
+*.tsv
+*.txt
+
+/.RData
+/.Rhistory 

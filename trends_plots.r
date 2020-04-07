@@ -1,11 +1,18 @@
 #!/usr/bin/Rscript
 
-library(tidyverse)
+# In this script we take the data from trends extraction from pubmed and transform them to create plots.
+# The data file contains 5 fields, the line of the original file, the id of the article - PMID, the keyword that was matched, the file that contains the keyword and the year of the publication.
+# Three types of plots are created, bar plot, yearly line plot and a heatmap of co-occurrances
+# 
+library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
+library(Matrix) # version Matrix 1.2-15
 
+## file loading
 trends_pubmed <- read_delim("2020-04-01_trends_pubmed.tsv", delim="\t", col_names=F)
 
 colnames(trends_pubmed) <- c("line","PMID","keyword","file","year")
 
+## bar plot of keyword frequencies
 pubmed_keyword_frequency <- ggplot()+
     geom_bar(data=trends_pubmed,aes(keyword))+
     theme_bw()+
@@ -13,7 +20,7 @@ pubmed_keyword_frequency <- ggplot()+
     
 ggsave("plots/pubmed_keyword_frequency.pdf", plot = pubmed_keyword_frequency, device = "pdf", dpi = 150)
 
-
+## trends per year
 keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,year) %>% group_by(year, keyword) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% mutate(cumulative_counts=cumsum(counts))
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
@@ -25,22 +32,22 @@ pubmed_keyword_per_year <- ggplot()+
     
 ggsave("plots/pubmed_keyword_per_year.pdf", plot = pubmed_keyword_per_year, device = "pdf", dpi = 150)
 
+# cummulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=cumulative_counts, color=keyword), show.legend=T)+
+    scale_x_continuous(breaks=seq(1940,2020,10),limits=c(1940,2020))+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
 ggsave("plots/pubmed_keyword_per_year_cumulative.pdf", plot = pubmed_keyword_per_year_cumulative, device = "pdf", dpi = 150)
 
-# Heatmap
+##################### Heatmap #######################
 
-library(Matrix)
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
 
-# create a matrix class spMatrix to do inverse table multiplication
+# create a matrix class spMatrix (handles better sparse matrices) to do inverse table multiplication
 papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),ncol=length(unique(papers_keywords_network$keyword)),i=as.numeric(factor(papers_keywords_network$PMID)),j=as.numeric(factor(papers_keywords_network$keyword)),x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
-
 
 row.names(papers_keywords_matrix) <- levels(factor(papers_keywords_network$PMID))
 colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keyword))
@@ -48,31 +55,31 @@ colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keywor
 # with the inverse cross product we do the projection of the edgelist to keywords in order to calculate how many times keyword pairs appear together in abstracts.
 keywords_heatmap <- tcrossprod(t(papers_keywords_matrix))
 
-# because is summetric we keep the triangle
+# because the matrix is summetric we keep the triangle
 keywords_heatmap[upper.tri(keywords_heatmap)] <- NA
 
-keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) # %>% filter(count>0)
-
-write_delim(keywords_heatmap_long, "keywords_heatmap.txt", delim="\t")
+# transform to long format for plotting and remove zero's and NA's and assign -1 to loops (self occurrence)
+keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) %>% mutate(count=if_else(colname==rowname,-1,count)) %>% filter(count!=0) %>% na.omit()
 
 #factor values so they appear in alphabetical order
 keywords_heatmap_long$colname <- factor(keywords_heatmap_long$colname, level=unique(keywords_heatmap_long$colname))
 
 keywords_heatmap_long$rowname <- factor(keywords_heatmap_long$rowname, level=unique(keywords_heatmap_long$rowname))
 
-# remove zero's and loops (self occurrence)
-keywords_heatmap_long <- keywords_heatmap_long %>% filter(!rowname==colname, count>0)
-
 # elements of the plot
-g <- guide_legend("no of abstracts") # legend title and combination of different colors and shapes into one legend
-breaks=c(50,500,1000,4000,8000,12000) # the breaks of the legend and point size
+## only the loops in order to color the heatmap diagonal differently
+diagonal <- keywords_heatmap_long %>% filter(count==-1)
 
-#
+g <- guide_legend("no of abstracts") # legend title and combination of different colors and shapes into one legend
+breaks=c(1,50,500,1000,4000,8000,12000) # the breaks of the legend and point size
+
+# running the plot
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,aes(x=colname, y=rowname,fill=count),alpha=0, show.legend = F)+
   geom_point(data=keywords_heatmap_long,aes(x=colname, y=rowname,colour = count, size =count))  +
-  scale_size_binned(name="co-occurrence",range = c(1, 10),breaks=breaks)+
-  scale_colour_gradientn(colours =c("gray80","steelblue1","yellowgreen","yellow","orange"),breaks=breaks) +
+  scale_size_binned(name="co-occurrence",range = c(0.5, 10),breaks=breaks)+
+  scale_colour_gradientn(colours =c("gray80","steelblue1","yellowgreen","yellow","goldenrod1","orange"),breaks=breaks) +
+  geom_point(data=diagonal,aes(x=colname, y=rowname),colour="lightyellow4",size=1,show.legend = F)+
   scale_x_discrete(position = "top")+
   guides(colour = g, size = g)+
   ggtitle("Heatmap of co-occurrence of keywords")+
