@@ -48,12 +48,14 @@ For results file transformation, statistics and plotting we used R version 3.5.2
 
 The analysis is divided in two scripts, one shell script for keyword mining and one R script for data transformations and plotting. Plots are saved in ```.png``` format in a subdirectory named ``` plots ```.
 
+The user is necessary to pass 2 arguments in the bash script. The first is the file with the keywords and the second is the path where PubMed corpus is stored.
 
 ```
-shell script command
+bash trend_analysis.sh keywords.txt /data/databases/pubmed/
 
 ```
 
+When indexing is finished the script calls the r script to generate the plots.
 
 ### Search
 
