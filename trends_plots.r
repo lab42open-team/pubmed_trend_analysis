@@ -29,37 +29,58 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=cumulative_counts, color=keyword), show.legend=T)+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
-    
+   
 ggsave("plots/pubmed_keyword_per_year_cumulative.pdf", plot = pubmed_keyword_per_year_cumulative, device = "pdf", dpi = 150)
 
 # Heatmap
 
 library(Matrix)
-
+# create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
 
+# create a matrix class spMatrix to do inverse table multiplication
 papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),ncol=length(unique(papers_keywords_network$keyword)),i=as.numeric(factor(papers_keywords_network$PMID)),j=as.numeric(factor(papers_keywords_network$keyword)),x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
+
 
 row.names(papers_keywords_matrix) <- levels(factor(papers_keywords_network$PMID))
 colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keyword))
 
+# with the inverse cross product we do the projection of the edgelist to keywords in order to calculate how many times keyword pairs appear together in abstracts.
 keywords_heatmap <- tcrossprod(t(papers_keywords_matrix))
+
+# because is summetric we keep the triangle
+keywords_heatmap[upper.tri(keywords_heatmap)] <- NA
 
 keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) # %>% filter(count>0)
 
 write_delim(keywords_heatmap_long, "keywords_heatmap.txt", delim="\t")
 
+#factor values so they appear in alphabetical order
 keywords_heatmap_long$colname <- factor(keywords_heatmap_long$colname, level=unique(keywords_heatmap_long$colname))
+
 keywords_heatmap_long$rowname <- factor(keywords_heatmap_long$rowname, level=unique(keywords_heatmap_long$rowname))
 
-pubmed_keyword_coocurrence_heatmap <- ggplot(keywords_heatmap_long,aes(x=colname,y=rowname,fill=count))+
-    #geom_tile()+
-    geom_point(aes(colour = count, size =count))  +    ## geom_point for circle illusion
-    #scale_color_gradient(low = "yellow",high = "red")+       ## color of the corresponding aes
-    scale_size(range = c(1, 10))+
-    #scale_color_brewer(palette = "PuOr")+
-    ggtitle("Heatmap of co-occurrence of keywords")+
-    theme_bw()+
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# remove zero's and loops (self occurrence)
+keywords_heatmap_long <- keywords_heatmap_long %>% filter(!rowname==colname, count>0)
+
+# elements of the plot
+g <- guide_legend("no of abstracts") # legend title and combination of different colors and shapes into one legend
+breaks=c(50,500,1000,4000,8000,12000) # the breaks of the legend and point size
+
+#
+pubmed_keyword_coocurrence_heatmap <- ggplot()+
+  geom_tile(data=keywords_heatmap_long,aes(x=colname, y=rowname,fill=count),alpha=0, show.legend = F)+
+  geom_point(data=keywords_heatmap_long,aes(x=colname, y=rowname,colour = count, size =count))  +
+  scale_size_binned(name="co-occurrence",range = c(1, 10),breaks=breaks)+
+  scale_colour_gradientn(colours =c("gray80","steelblue1","yellowgreen","yellow","orange"),breaks=breaks) +
+  scale_x_discrete(position = "top")+
+  guides(colour = g, size = g)+
+  ggtitle("Heatmap of co-occurrence of keywords")+
+  xlab("") +
+  ylab("")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+
 ggsave("plots/pubmed_keyword_coocurrence_heatmap.pdf", plot = pubmed_keyword_coocurrence_heatmap, device = "pdf", dpi = 150)
+
 
