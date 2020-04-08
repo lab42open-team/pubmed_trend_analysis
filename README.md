@@ -36,7 +36,7 @@ environment
 omics
 ecology
 ```
-But these keywords need regular expressions to retrive also plural forms and complex words
+But these keywords need regular expressions to retrive also plural forms suffixes and complex words
 
 ## Prerequisites
 
@@ -48,10 +48,10 @@ For results file transformation, statistics and plotting we used R version 3.5.2
 
 The analysis is divided in two scripts, one shell script for keyword mining and one R script for data transformations and plotting. Plots are saved in ```.png``` format in a subdirectory named ``` plots ```.
 
-The user is necessary to pass 2 arguments in the bash script. The first is the file with the keywords and the second is the path where PubMed corpus is stored.
+The user is necessary to pass 3 arguments in the bash script. The first is the file with the keywords, the second is the path where PubMed corpus is stored and the third is the suffix of the output file and the respective plots.
 
 ```
-bash trend_analysis.sh keywords.txt /data/databases/pubmed/
+bash trend_analysis.sh keywords.txt /data/databases/pubmed/ "ecology_trends"
 
 ```
 

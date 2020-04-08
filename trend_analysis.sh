@@ -1,13 +1,16 @@
 #!/bin/bash
 # this script is about finding matches of keywords in the pubmed tsv files
 
+########################### user arguments#####################################
 user_keywords=$1
 pubmed_path=$2
+user_prefix=$3
+###############################################################################
 
-DATE=$(date '+%Y-%m-%d')
+################################## Initiation #################################
 time_start=`date +%s`
 
-output="$(date '+%Y-%m-%d')_trends_pubmed.tsv"
+output="${user_prefix}_$(date '+%Y-%m-%d_%k-%M')_trends_pubmed.tsv"
 touch $output
 
 files=$(find $pubmed_path -name \*.tsv.gz) # the files that we will search for patterns in the directory that they are stored
@@ -23,6 +26,8 @@ i=0
 echo "Processing $files_number files with $keywords_number keywords"
 echo "Percentage% =" `expr $((($i/$total_repeats)*100))`
 
+############################## GREP SEARCH #####################################
+
 while IFS= read -r keyword; do # there is a text file containing the keywords, each line has a keyword
   for file in $files; do
       
@@ -36,6 +41,7 @@ while IFS= read -r keyword; do # there is a text file containing the keywords, e
   awk -v i=$i -v total_repeats=$total_repeats 'BEGIN { print "Percentage = " (i/total_repeats) }'
 
 done < $1
+############################## END OF SEARCH ####################################
 
 time_end=`date +%s`
 time_exec=`expr $(( $time_end - $time_start ))`
@@ -43,6 +49,7 @@ time_exec=`expr $(( $time_end - $time_start ))`
 echo "PubMed Trends file created! Execution time was $time_exec seconds"
 echo "Plotting results..."
 
-Rscript "trends_plots.r" "$output"
+########################### CALLING R SCRIPT #####################################
+Rscript "trends_plots.r" "$output" "$user_prefix"
 
 echo "Finished!"

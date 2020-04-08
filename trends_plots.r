@@ -8,7 +8,8 @@ library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are r
 library(Matrix) # version Matrix 1.2-15
 
 ## file loading
-args = commandArgs(trailingOnly=TRUE)
+args <- commandArgs(trailingOnly=TRUE)
+user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F)
 
@@ -20,10 +21,11 @@ pubmed_keyword_frequency <- ggplot()+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
-ggsave("plots/pubmed_keyword_frequency.png", plot = pubmed_keyword_frequency, device = "png", dpi = 150)
+ggsave(paste0("plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_frequency.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 150)
+
 
 ## trends per year
-keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,year) %>% group_by(year, keyword) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% mutate(cumulative_counts=cumsum(counts))
+keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,year) %>% group_by(year, keyword) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword) %>% mutate(cumulative_counts=cumsum(counts))
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
 pubmed_keyword_per_year <- ggplot()+
@@ -32,7 +34,7 @@ pubmed_keyword_per_year <- ggplot()+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
     
-ggsave("plots/pubmed_keyword_per_year.png", plot = pubmed_keyword_per_year, device = "png", dpi = 150)
+ggsave(paste0("plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
 
 # cummulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
@@ -41,7 +43,7 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
-ggsave("plots/pubmed_keyword_per_year_cumulative.png", plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
 
 ##################### Heatmap #######################
 
@@ -90,6 +92,6 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave("plots/pubmed_keyword_heatmap.png", plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
 
 
