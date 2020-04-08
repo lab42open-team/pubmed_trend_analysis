@@ -33,9 +33,9 @@ while IFS= read -r keyword; do # there is a text file containing the keywords, e
 
   echo $keyword
   
-  awk -v i=$i -v total_repeats=$total_repeats 'BEGIN { print "Percentage = " (i/total_repeats) }'
+  awk -v i=$i -v total_repeats=$total_repeats 'BEGIN { print "Percentage% = " (i/total_repeats) "%" }'
 
-done < $1
+done < "$1"
 
 time_end=`date +%s`
 time_exec=`expr $(( $time_end - $time_start ))`
