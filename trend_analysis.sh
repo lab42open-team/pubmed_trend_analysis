@@ -31,7 +31,7 @@ echo "Percentage% =" `expr $((($i/$total_repeats)*100))`
 while IFS= read -r keyword; do # there is a text file containing the keywords, each line has a keyword
   for file in $files; do
       
-      zgrep -inw "$keyword" $file | awk -v var="$keyword" -v file="$file" 'BEGIN{FS="\t"; OFS="\t"} {sub(":","\t"); print $1,$2,var,file,$5}' >> $output # grep in zipped files, -i for case insensitive,-w for searching the whole pattern and -n to return the line of the match. 
+      zgrep -in "$keyword" $file | awk -v var="$keyword" -v file="$file" 'BEGIN{FS="\t"; OFS="\t"} {sub(":","\t"); print $1,$2,var,file,$5}' >> $output # grep in zipped files, -i for case insensitive,-w for searching the whole pattern and -n to return the line of the match. 
       ((i+=1))
       
       done

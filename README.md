@@ -18,7 +18,7 @@ A .txt file with the following keywords is read from the bash script
 ```
 microbiome
 text mining
-biogeochemical cycles
+biogeochemical cycle
 biogeochemistry
 metabolism
 metabolome
@@ -28,7 +28,6 @@ ecosystem function
 ecosystem service
 flux balance analysis
 biodiversity
-fba
 flux
 metabolic process
 microbial ecology
@@ -59,6 +58,8 @@ When indexing is finished the script calls the r script to generate the plots.
 
 ### Search
 
+The heart of the search is the ```grep``` function. We used ```grep -ni```, -i for case insensitive search and -n to return the whole line of the file if a match is found. This basic form of grep in the aformantioned keywords is able to find plurals
+
 ### Plots
 
 Three types of plots are created to provide insight to trends of the specific keywords.
@@ -84,4 +85,9 @@ In order to find the co-mention frequencies we used a simple matrix multiplicati
 
 ![Heatmap](plots/pubmed_keyword_heatmap.png)
 
+Because the difference of keywords distance can be several orders of multitude we plotted the log2 values to reduce the divergence.
 
+
+#### Jaccard index
+
+We also wanted to quantify the co-mention of keywords in terms of similarity. We choose the Jaccard similarity because is intuitive and easy to calculate; it is defined as the intersection over the union of two sets. Hence it is located in the [0,1] space.
