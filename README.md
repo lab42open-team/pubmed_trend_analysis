@@ -87,10 +87,10 @@ In order to find the co-mention frequencies we used a simple matrix multiplicati
 
 Because the difference of keywords distance can be several orders of multitude we plotted the log2 values to reduce the divergence.
 
-![Heatmap in log scale](species_2020-04-14_03-17_log_pubmed_keyword_heatmap.png)
+![Heatmap in log scale](plots/species_2020-04-14_03-17_log_pubmed_keyword_heatmap.png)
 
 #### Jaccard similarity
 
 We also wanted to quantify the co-mention of keywords in terms of similarity. We choose the Jaccard similarity because is intuitive and easy to calculate; it is defined as the intersection over the union of two sets. Hence it is located in the [0,1] space.
 
-![Heatmap with Jaccard similarity](species_2020-04-14_03-17_pubmed_jaccard_heatmap.png)
+![Heatmap with Jaccard similarity](plots/species_2020-04-14_03-17_pubmed_jaccard_heatmap.png)
