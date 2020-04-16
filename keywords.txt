@@ -1,7 +1,7 @@
 microbiome
+microorganism
 text mining
-biogeochemical cycles
-biogeochemistry
+biogeochemical cycle
 metabolism
 metabolome
 data mining
@@ -10,10 +10,10 @@ ecosystem function
 ecosystem service
 flux balance analysis
 biodiversity
-fba
 flux
-metabolic process
+metabolic procesis
+metabolic network
 microbial ecology
+molecular ecology
 environment
-omics
 ecology
