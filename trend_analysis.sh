@@ -29,12 +29,15 @@ echo "Percentage% =" `expr $((($i/$total_repeats)*100))`
 ############################## GREP SEARCH #####################################
 
 while IFS= read -r keyword; do # there is a text file containing the keywords, each line has a keyword
-  for file in $files; do
-      
+  
+
       regex_keyword="$(echo $keyword | gawk '{gsub(/ /,"[- ]",$0)}{key="\\b"$0"[[:alpha:]]?\\b"; print key}')"
       
       echo $keyword
       echo $regex_keyword
+  
+  for file in $files; do
+      
       
       zgrep -inE "$regex_keyword" $file | awk -v var="$keyword" -v file="$file" 'BEGIN{FS="\t"; OFS="\t"} {sub(":","\t"); print $1,$2,var,file,$5}' >> $output # grep in zipped files, -i for case insensitive,-w for searching the whole pattern and -n to return the line of the match. 
       ((i+=1))
