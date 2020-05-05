@@ -7,7 +7,10 @@
 library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
 library(Matrix) # version Matrix 1.2-15
 
-## file loading
+## file loading. Plotting takes two arguments,
+## 1) file name
+## 2) prefix for the plots names
+
 args <- commandArgs(trailingOnly=TRUE)
 user_prefix <- args[2]
 
@@ -16,11 +19,16 @@ trends_pubmed <- read_delim(args[1], delim="\t", col_names=F)
 colnames(trends_pubmed) <- c("line","PMID","keyword","file","year")
 
 ## bar plot of keyword frequencies
+
+trends_counts <- trends_pubmed %>% distinct(PMID,keyword) %>% group_by(keyword) %>% summarise(counts=n())
+
 pubmed_keyword_frequency <- ggplot()+
-    geom_bar(data=trends_pubmed,aes(keyword))+
+    geom_col(data=trends_counts,aes(x=keyword,y=counts),width=0.8)+
+    geom_text(data=trends_counts,aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
+    scale_y_continuous(name="Number of papers",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
     theme_bw()+
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
+
 ggsave(paste0("plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_frequency.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 150)
 
 
