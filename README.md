@@ -94,3 +94,14 @@ Because the difference of keywords distance can be several orders of multitude w
 We also wanted to quantify the co-mention of keywords in terms of similarity. We choose the Jaccard similarity because is intuitive and easy to calculate; it is defined as the intersection over the union of two sets. Hence it is located in the [0,1] space.
 
 ![Heatmap with Jaccard similarity](plots/species_2020-04-14_03-17_pubmed_jaccard_heatmap.png)
+
+
+## Two Keyword co-occurences
+
+Sometimes it is insightful to view keyword co-occurences per year to view the trend. To do this we created a different script. The user must specify the data generated from the basic script and then two keywords. The script automatically checks if the both keywords exist in the data. If they exist the script calculates the abstracts per year that both keywords are mentioned. Then it generates a plot with each keyword and then their co-occurrance.
+
+```
+Rscript trends_2_keywords_plot.r data_file "keyword1" "keyword2" "file_prefix"
+
+```
+
