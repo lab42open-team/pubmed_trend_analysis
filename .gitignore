@@ -2,5 +2,8 @@
 *.tsv
 *.txt
 
+data/
+plots/
+
 /.RData
 /.Rhistory 
