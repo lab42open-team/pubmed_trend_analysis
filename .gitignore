@@ -1,6 +1,7 @@
 # ignore all tsv and txt files in the repository
 *.tsv
 *.txt
+*.swp
 
 data/
 plots/
