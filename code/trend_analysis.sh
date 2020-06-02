@@ -9,8 +9,9 @@ user_prefix=$3
 
 ################################## Initiation #################################
 time_start=`date +%s`
+DATE=$(date +"%Y-%m-%d_%H-%M")
 
-output="../data/${user_prefix}_$(date '+%Y-%m-%d_%k-%M')_trends_pubmed.tsv"
+output="../data/${user_prefix}_${DATE}_trends_pubmed.tsv"
 touch $output
 
 files=$(find $pubmed_path -name \*.tsv.gz) # the files that we will search for patterns in the directory that they are stored

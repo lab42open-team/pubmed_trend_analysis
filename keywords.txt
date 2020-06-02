@@ -5,15 +5,9 @@ biogeochemical cycle
 metabolism
 metabolome
 data mining
-ecosystem
 ecosystem function
 ecosystem service
 flux balance analysis
-biodiversity
-flux
-metabolic procesis
 metabolic network
 microbial ecology
 molecular ecology
-environment
-ecology
