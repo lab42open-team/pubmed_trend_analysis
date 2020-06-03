@@ -3,7 +3,11 @@
 # In this script we take the data from trends extraction from pubmed and transform them to create plots.
 # The data file contains 5 fields, the line of the original file, the id of the article - PMID, the keyword that was matched, the file that contains the keyword and the year of the publication.
 # Three types of plots are created, bar plot, yearly line plot and a heatmap of co-occurrances
-# 
+#
+#
+# Change the n_papers_pubmed when pubmed is refreshed in order to estimate the random chance of keyword occurrance.
+#
+#
 library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
 library(Matrix) # version Matrix 1.2-15
 
@@ -38,7 +42,7 @@ keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,year) %>% group_by
 
 pubmed_keyword_per_year <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=counts, color=keyword), show.legend=T)+
-    scale_x_continuous(breaks=seq(1940,2020,10),limits=c(min(keywords_per_year$year),2020))+
+    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
     
@@ -47,7 +51,7 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
 # cummulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=cumulative_counts, color=keyword), show.legend=T)+
-    scale_x_continuous(breaks=seq(1940,2020,10),limits=c(min(keywords_per_year$year),2020))+
+    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
@@ -58,7 +62,11 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
 
-keywords_n_papers <- papers_keywords_network %>% group_by(keyword) %>% summarise(n_papers=n()) 
+n_papers_pubmed <- 29562128 # number of unique papers in PubMed. Must be updated when PubMed will be refreshed!!!!!!!
+
+keywords_n_papers <- papers_keywords_network %>% group_by(keyword) %>% summarise(n_papers=n()) %>% mutate(freq=n_papers/n_papers_pubmed) 
+
+
 
 # create a matrix class spMatrix (handles better sparse matrices) to do inverse table multiplication
 papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),ncol=length(unique(papers_keywords_network$keyword)),i=as.numeric(factor(papers_keywords_network$PMID)),j=as.numeric(factor(papers_keywords_network$keyword)),x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
@@ -69,7 +77,7 @@ colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keywor
 # with the inverse cross product we do the projection of the edgelist to keywords in order to calculate how many times keyword pairs appear together in abstracts.
 keywords_heatmap <- tcrossprod(t(papers_keywords_matrix))
 
-# because the matrix is summetric we keep the triangle
+# becaue the matrix is summetric we keep the triangle
 keywords_heatmap[upper.tri(keywords_heatmap)] <- 0
 
 keywords_heatmap <- as.data.frame(as.matrix(keywords_heatmap))
@@ -155,7 +163,7 @@ ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M")
 
 ## Jaccard index is the intersection over the union. So we join for each node - keyword the total occurrencies. The join is double because we have two columns of keywords and this way is easier for the calculations
 
-keywords_heatmap_jaccard <- keywords_heatmap_long %>% left_join(keywords_n_papers,c("rowname"="keyword")) %>% left_join(keywords_n_papers,c("colname"="keyword")) %>% mutate(jaccard_index=count/(n_papers.x+n_papers.y-count))
+keywords_heatmap_jaccard <- keywords_heatmap_long %>% left_join(keywords_n_papers,c("rowname"="keyword")) %>% left_join(keywords_n_papers,c("colname"="keyword")) %>% mutate(jaccard_index=count/(n_papers.x+n_papers.y-count), random_expectation=(count/n_papers_pubmed)/(freq.x*freq.y))
 
 colors_j <- c("steelblue1","yellow","goldenrod1","orange")
 limits<- c(0, round(max(keywords_heatmap_jaccard$jaccard_index[keywords_heatmap_jaccard$jaccard_index < 1])*1.07,4) )
@@ -174,4 +182,24 @@ pubmed_jaccard_heatmap <- ggplot()+
     theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_jaccard_heatmap.png"), plot = pubmed_jaccard_heatmap, device = "png", dpi = 150)
+
+
+
+################################ Actual vs Random  ######################################
+
+
+pubmed_random_heatmap <- ggplot()+ 
+    geom_tile(data=keywords_heatmap_jaccard,aes(x=colname, y=rowname,fill=random_expectation),alpha=1, show.legend = T,colour = "white")+
+    geom_tile(data=diagonal,aes(x=colname, y=rowname,fill=count),show.legend = F)+
+    scale_fill_gradient2(low = "steelblue1",mid = "white",high = "orange",midpoint = 1,na.value = "grey50")+
+    scale_x_discrete(position = "top")+
+    ggtitle("Heatmap of Actual against random expectation co-occurrence between keywords")+
+    xlab("") +
+    ylab("")+
+    guides(fill = guide_legend(title="Times above randomness"))+
+    theme_bw()+
+    theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_random_heatmap.png"), plot = pubmed_random_heatmap, device = "png", dpi = 150)
+
 
