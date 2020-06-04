@@ -104,7 +104,7 @@ We also wanted to quantify the co-mention of keywords in terms of similarity. We
 
 In this heatmap we compare the co-mention frequency with random expectation. 
 
-$$ real versus random = {p_{i,j} \over p_{i}p_{j}}. $$
+$$real_versus_random={p_{i,j}\over p_{i}p_{j}}$
 
 All frequencies are measured with the total unique abstracts in PubMed.
 
