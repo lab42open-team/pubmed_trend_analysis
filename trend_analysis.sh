@@ -39,9 +39,10 @@ echo 'Prefix: ' $user_prefix
 ################################## Initiation #################################
 time_start=`date +%s`
 DATE=$(date +"%Y-%m-%d_%H-%M")
-
-output="../data/${user_prefix}_${DATE}_trends_pubmed.tsv"
+output="data/${user_prefix}_${DATE}_trends_pubmed.tsv"
 touch $output
+
+echo 'Data will be stored in ' $output
 
 files=$(find $pubmed_path -name \*.tsv.gz) # the files that we will search for patterns in the directory that they are stored
 files_number=`find $pubmed_path -name \*.tsv.gz| wc -l`
