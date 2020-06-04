@@ -33,7 +33,7 @@ pubmed_keyword_frequency <- ggplot()+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_frequency.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 150)
+ggsave(paste0("plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_frequency.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 150)
 
 
 ## trends per year
@@ -46,7 +46,7 @@ pubmed_keyword_per_year <- ggplot()+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
     
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
+ggsave(paste0("plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
 
 # cummulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
@@ -55,7 +55,7 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
 
 ################################## Heatmaps #############################
 
@@ -124,7 +124,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
 
 #write_delim(keywords_heatmap_long,"heatmap_data.txt", delim="\t")
 
@@ -157,7 +157,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_log_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_log_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
 
 ################################ Jaccard Index ######################################
 
@@ -181,7 +181,7 @@ pubmed_jaccard_heatmap <- ggplot()+
     theme_bw()+
     theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_jaccard_heatmap.png"), plot = pubmed_jaccard_heatmap, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_jaccard_heatmap.png"), plot = pubmed_jaccard_heatmap, device = "png", dpi = 150)
 
 
 
@@ -201,6 +201,6 @@ pubmed_random_heatmap <- ggplot()+
     theme_bw()+
     theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_random_heatmap.png"), plot = pubmed_random_heatmap, device = "png", dpi = 150)
+ggsave(paste0("plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_random_heatmap.png"), plot = pubmed_random_heatmap, device = "png", dpi = 150)
 
 
