@@ -47,10 +47,15 @@ For results file transformation, statistics and plotting we used R version 3.5.2
 
 The analysis is divided in two scripts, one shell script for keyword mining and one R script for data transformations and plotting. Plots are saved in ```.png``` format in a subdirectory named ``` plots ```.
 
-The user is necessary to pass 3 arguments in the bash script. The first is the file with the keywords, the second is the path where PubMed corpus is stored and the third is the suffix of the output file and the respective plots.
+The user is necessary to pass 3 arguments in the executable bash script. These arguments are passed through flags
+
+* -k | --keywords, expects a the path of the txt file with the keywords
+* -d | --data, expects the path to the PubMed data
+* -p | --prefix, expects a string with prefix of all the generated files (txt and plots)
+
 
 ```
-bash trend_analysis.sh keywords.txt /data/databases/pubmed/ "ecology_trends"
+./trend_analysis.sh -k keywords.txt -d default -p "ecology_trends"
 
 ```
 
@@ -95,6 +100,13 @@ We also wanted to quantify the co-mention of keywords in terms of similarity. We
 
 ![Heatmap with Jaccard similarity](demo/species_2020-04-14_03-17_pubmed_jaccard_heatmap.png)
 
+#### Random expectation 
+
+In this heatmap we compare the co-mention frequency with random expectation. 
+
+$$real versus random = {p_{i,j} \over p_{i}p_{j}}.$$
+
+All frequencies are measured with the total unique abstracts in PubMed.
 
 ## Two Keyword co-occurences
 
