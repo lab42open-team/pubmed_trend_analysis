@@ -2,9 +2,38 @@
 # this script is about finding matches of keywords in the pubmed tsv files
 
 ########################### user arguments#####################################
-user_keywords=$1
-pubmed_path=$2
-user_prefix=$3
+# There are 3 user arguments. -k is for the keywords, -d is for pubmed destination and -p is for the user defined prefix of all files created from the analysis (e.g text files and plots). -d has a "default" option to use the inhouse pubmed downloads.
+
+while [ "$1" != "" ]; do
+  case $1 in
+    -k | --keywords )
+      shift # after the match of the -k | --keywords it moves the counter to the next number to take the import. Otherwise the value of $1 would have been "-k" and not the user argument
+      user_keywords=$1
+      ;;
+
+    -d | --data )
+      shift
+      if [ "$1" == "default" ];then # the default option of Pubmed location
+        pubmed_path="/data/databases/pubmed/"
+      else
+        pubmed_path=$1
+      fi
+      ;;
+    -p | --prefix)
+      shift
+      user_prefix=$1
+      ;;
+
+  esac
+  shift
+
+done
+
+echo 'The arguments passed are: '
+echo 'keywords file: ' $user_keywords
+echo 'PubMed folder: '$pubmed_path
+echo 'Prefix: ' $user_prefix
+
 ###############################################################################
 
 ################################## Initiation #################################
@@ -48,7 +77,7 @@ while IFS= read -r keyword; do # there is a text file containing the keywords, e
   
   awk -v i=$i -v total_repeats=$total_repeats 'BEGIN { print "Percentage = " (i/total_repeats) }'
 
-done < $1
+done < $user_keywords
 ############################## END OF SEARCH ####################################
 
 time_end=`date +%s`
