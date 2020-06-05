@@ -197,9 +197,9 @@ pubmed_random_heatmap <- ggplot()+
     ggtitle("Heatmap of Actual against random expectation co-occurrence between keywords")+
     xlab("") +
     ylab("")+
-    guides(fill = guide_legend(title="Times above randomness"))+
+    guides(fill = guide_legend(title="Times above random"))+
     theme_bw()+
-    theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+    theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.8, .25))
 
 ggsave(paste0("plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_random_heatmap.png"), plot = pubmed_random_heatmap, device = "png", dpi = 150)
 
