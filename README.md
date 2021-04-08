@@ -1,4 +1,6 @@
-# Trend analysis of PubMed abstracts for microbial ecology and ecology informatics
+# Trends and Gaps identification in literature
+
+## Trend and Gap analysis of PubMed abstracts
 
 This analysis aims to elucidate the trends of research focus and disciplines intersections. Trends will be found using specific keyword search in the PubMed corpus. When a keyword is found in an article the article ID (PMID) and year of publication are saved. Then we search the co-occurrences of keywords in the same article to infer when these keywords - research topics - started to combine.
 
