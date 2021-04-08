@@ -1,4 +1,6 @@
-# Trends and Gaps identification in literature
+# DIG: trenD | Gap analysis of scientific literature
+
+![logo of DIG](DIG_trends_gaps_analysis.png)
 
 ## Trend and Gap analysis of PubMed abstracts
 
