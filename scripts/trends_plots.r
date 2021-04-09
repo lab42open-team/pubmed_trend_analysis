@@ -4,6 +4,13 @@
 # The data file contains 5 fields, the line of the original file, the id of the article - PMID, the keyword that was matched, the file that contains the keyword and the year of the publication.
 # Three types of plots are created, bar plot, yearly line plot and a heatmap of co-occurrances
 #
+# Author:   Savvas Paragkamian (s.paragkamian@hcmr.gr)
+#           Institute of Marine Biology Biotechnology and Aquaculture (IMBBC)
+#           Hellenic Centre for Marine Research (HCMR)
+#
+# Created:  05/06/2020
+# License:  GNU GPLv3 license
+# Developer : Savvas Paragkamian
 #
 # Change the n_papers_pubmed when pubmed is refreshed in order to estimate the random chance of keyword occurrance.
 #
