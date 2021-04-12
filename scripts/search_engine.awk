@@ -15,7 +15,7 @@ BEGIN {
 # Treat corpus
 (ARGIND==2){
 
-#    if ( $4 ~ /[[:alnum:]]/ && $5 ~ /[[:alnum:]]/ && $6 ~ /[[:alnum:]]/) {
+    if ( $4 ~ /[[:alnum:]]/ && $5 ~ /[[:alnum:]]/ && $6 ~ /[[:alnum:]]/) {
 
         line=tolower($5$6)
 
@@ -27,7 +27,7 @@ BEGIN {
                 corpus[$1]= $4 "\t" line "\t" k
             }
         }
-#    }
+    }
 }
 
 END{ 
