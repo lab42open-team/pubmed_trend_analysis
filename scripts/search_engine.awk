@@ -1,6 +1,8 @@
 #! /usr/bin/gawk -f
-#  gunzip -c dataset/*.tsv.gz | ./scripts/search_engine.awk keywords.txt - > results.tsv
+# Author Savvas Paragkamian
 #
+# Run :  gunzip -c dataset/*.tsv.gz | ./scripts/search_engine.awk keywords.txt - > results.tsv
+# Note the - , it takes the input from the pipe |
 #
 BEGIN {
     FS="\t"
@@ -8,11 +10,10 @@ BEGIN {
 
 # Treat keywords
 (ARGIND==1){
-    $key=tolower($1)
-    keywords[$key]++
+    keywords[$1]=tolower($1)
 }
 
-# Treat corpus
+# Treat corpus. The input comes from the - from the execution of the script
 (ARGIND==2){
 
     if ( $4 ~ /[[:alnum:]]/ && $5 ~ /[[:alnum:]]/ && $6 ~ /[[:alnum:]]/) {
@@ -22,19 +23,11 @@ BEGIN {
         sub("\\|.*$","",$1)
         
         for (k in keywords){
-            regex=k #"[:blank:]"
-            if (match(line, regex)){
-                corpus[$1]= $4 "\t" line "\t" k
+            #regex=k "$"  #"[:blank:]"
+            if (match(line,"[^[:alpha:]]" keywords[k] "[^[:alpha:]]")){
+                print $1 "\t" $4 "\t" line "\t" keywords[k]
             }
         }
-    }
-}
-
-END{ 
-#    print length(corpus)
-#    print length(keywords)
-    for (i in corpus){
-            print i "\t" corpus[i]
     }
 }
 
