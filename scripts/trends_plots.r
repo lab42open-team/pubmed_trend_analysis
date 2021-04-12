@@ -31,7 +31,7 @@ user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
-colnames(trends_pubmed) <- c("line","PMID","keyword","file","year")
+colnames(trends_pubmed) <- c("PMID","year","keyword")
 
 ## bar plot of keyword frequencies
 
