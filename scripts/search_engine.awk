@@ -18,14 +18,14 @@ BEGIN {
 
     if ( $4 ~ /[[:alnum:]]/ && $5 ~ /[[:alnum:]]/ && $6 ~ /[[:alnum:]]/) {
 
-        line=tolower($5$6)
+        line=tolower($5$6) # combine title and abstract and make all text lowercase
 
-        sub("\\|.*$","",$1)
+        sub("\\|.*$","",$1) # remove the doi addresses from all the PMIDs
         
         for (k in keywords){
-            #regex=k "$"  #"[:blank:]"
+            
             if (match(line,"[^[:alpha:]]" keywords[k] "[^[:alpha:]]")){
-                print $1 "\t" $4 "\t" line "\t" keywords[k]
+                print $1 "\t" $4 "\t" keywords[k]
             }
         }
     }
