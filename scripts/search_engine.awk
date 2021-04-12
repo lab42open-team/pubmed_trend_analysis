@@ -14,8 +14,12 @@ BEGIN {
 
 # Treat corpus
 (ARGIND==2){
+
+    $line=tolower($0)
+    sub("\\|.*$","",$1)
+
     for (k in keywords){
-        if (tolower($0) ~ k){
+        if ($line ~ k){
             corpus[$1]= $4 "\t" k
         }
     }
