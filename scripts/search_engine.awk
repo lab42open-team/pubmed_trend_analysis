@@ -15,14 +15,19 @@ BEGIN {
 # Treat corpus
 (ARGIND==2){
 
-    $line=tolower($0)
-    sub("\\|.*$","",$1)
+#    if ( $4 ~ /[[:alnum:]]/ && $5 ~ /[[:alnum:]]/ && $6 ~ /[[:alnum:]]/) {
 
-    for (k in keywords){
-        if ($line ~ k){
-            corpus[$1]= $4 "\t" k
+        line=tolower($5$6)
+
+        sub("\\|.*$","",$1)
+        
+        for (k in keywords){
+            regex=k #"[:blank:]"
+            if (match(line, regex)){
+                corpus[$1]= $4 "\t" line "\t" k
+            }
         }
-    }
+#    }
 }
 
 END{ 
