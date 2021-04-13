@@ -14,18 +14,23 @@
 # There are 3 user arguments. -k is for the keywords, -d is for pubmed destination and -p is for the user defined prefix of all files created from the analysis (e.g text files and plots). -d has a "default" option to use the inhouse pubmed downloads.
 
 ## Usage of the script
-usage="Use the parameter -k for the keywords file, -d for the corpus directory (expects the path to the PubMed data) and -p a string with prefix of all the generated files (txt and plots). \nExample: ./trend_analysis.sh -k keywords.txt -d default -p "ecology_trends" \n"
+usage="Use the parameter -k for the keywords file, -d for the corpus directory (expects the path to the PubMed data) and -p a string with prefix of all the generated files (txt and plots). \nExample: ./scripts/dig_analysis.sh -k keywords.txt -d default -p "ecology_trends" \n"
+
+## Set the working directory
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )" # determine the path of the script
+cd $DIR # set the scripts directory as working directory
 
 ## User input parameters of keywords, corpus directore and prefix of the analysis.
 while getopts "k:d:p:" option
 do
    case "$option" in
-        k)   user_keywords="${OPTARG}";;
+        k)   user_keywords="../${OPTARG}";;
         d)   pubmed_path="${OPTARG}"
             if [ "$pubmed_path" == "default" ];then # the default option of Pubmed location
                 pubmed_path="/data/databases/pubmed/"
             else
-                pubmed_path=$1
+                pubmed_path="${OPTARG}"
             fi;;
         p) user_prefix="${OPTARG}";;
         ?|:)   echo -e "$usage" ; exit 1;;
@@ -58,9 +63,10 @@ echo 'Prefix: ' $user_prefix
 ###############################################################################
 
 ################################## Initiation #################################
+
 time_start=`date +%s`
 DATE=$(date +"%Y-%m-%d_%H-%M")
-output="data/${user_prefix}_${DATE}_trends_pubmed.tsv"
+output="../data/${user_prefix}_${DATE}_dig_analysis.tsv"
 touch $output
 
 echo 'Data will be stored in ' $output
@@ -80,27 +86,30 @@ echo "Percentage% =" `expr $((($i/$total_repeats)*100))`
 
 ############################## GREP SEARCH #####################################
 
-while IFS= read -r keyword; do # there is a text file containing the keywords, each line has a keyword
-  
+gunzip -c $files | ./search_engine.awk $user_keywords - > $output
 
-      regex_keyword="$(echo $keyword | gawk '{gsub(/ /,"[- ]",$0)}{key="\\b"$0"[[:alpha:]]?\\b"; print key}')"
-      
-      echo $keyword
-      echo $regex_keyword
-  
-  for file in $files; do
-      
-      
-      zgrep -inE "$regex_keyword" $file | awk -v var="$keyword" -v file="$file" 'BEGIN{FS="\t"; OFS="\t"} {sub(":","\t"); print $1,$2,var,file,$5}' >> $output # grep in zipped files, -i for case insensitive,-w for searching the whole pattern and -n to return the line of the match. 
-      ((i+=1))
-      
-      done
-
-  
-  awk -v i=$i -v total_repeats=$total_repeats 'BEGIN { print "Percentage = " (i/total_repeats) }'
-
-done < $user_keywords
-############################## END OF SEARCH ####################################
+################################################################################
+#while IFS= read -r keyword; do # there is a text file containing the keywords, each line has a keyword
+#  
+#
+#      regex_keyword="$(echo $keyword | gawk '{gsub(/ /,"[- ]",$0)}{key="\\b"$0"[[:alpha:]]?\\b"; print key}')"
+#      
+#      echo $keyword
+#      echo $regex_keyword
+#  
+#  for file in $files; do
+#      
+#      
+#      zgrep -inE "$regex_keyword" $file | awk -v var="$keyword" -v file="$file" 'BEGIN{FS="\t"; OFS="\t"} {sub(":","\t"); print $1,$2,var,file,$5}' >> $output # grep in zipped files, -i for case insensitive,-w for searching the whole pattern and -n to return the line of the match. 
+#      ((i+=1))
+#      
+#      done
+#
+#  
+#  awk -v i=$i -v total_repeats=$total_repeats 'BEGIN { print "Percentage = " (i/total_repeats) }'
+#
+#done < $user_keywords
+############################### END OF SEARCH ####################################
 
 time_end=`date +%s`
 time_exec=`expr $(( $time_end - $time_start ))`

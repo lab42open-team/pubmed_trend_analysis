@@ -1,8 +1,10 @@
 #!/usr/bin/Rscript
 
-library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
-library(Matrix) # version Matrix 1.2-15
-library(scales)
+suppressPackageStartupMessages({
+    library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
+    library(Matrix) # version Matrix 1.2-15
+    library(scales)
+})
 ### This script creates plot to compare coocurrences between two keywords.
 ### The user feeds the script with 4 arguments,
 ### 1. data file name
@@ -19,7 +21,7 @@ keywords_1_and_2 <- paste0(keyword1,"_AND_",keyword2)
 user_prefix <- args[4]
 
 ## file loading
-trends_pubmed <- read_delim(args[1], delim="\t", col_names=F)
+trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
 colnames(trends_pubmed) <- c("line","PMID","keyword","file","year")
 
@@ -66,7 +68,7 @@ pubmed_keyword_per_year <- ggplot()+
     theme_bw()+
     theme(legend.position=c(0.3,0.9))
     
-ggsave(paste0("plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_coocurence_per_year.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
+ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_coocurence_per_year.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
 
 # cummulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
@@ -77,7 +79,7 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()+
     theme(legend.position=c(0.3,0.9))
-ggsave(paste0("plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
 
 
 
