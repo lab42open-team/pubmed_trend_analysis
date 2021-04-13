@@ -9,6 +9,7 @@ BEGIN {
     }
 
 # Treat keywords
+
 (ARGIND==1){
     keywords[$1]=tolower($1)
 }
@@ -25,9 +26,18 @@ BEGIN {
         for (k in keywords){
             
             if (match(line,"[^[:alpha:]]" keywords[k] "[^[:alpha:]]")){
-                print $1 "\t" $4 "\t" keywords[k]
+                matches[$1 "\t" keywords[k]]= $4 #print $1 "\t" $4 "\t" keywords[k]
             }
         }
     }
 }
+END{
 
+
+    for (i in matches){
+        
+        print matches[i] "\t" i
+
+        }
+
+}
