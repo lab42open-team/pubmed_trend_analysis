@@ -79,16 +79,16 @@ keywords_number=${#keywords_file[@]}
 
 total_repeats=$(($keywords_number*$files_number))
 
-i=0
-
-echo "Processing $files_number files with $keywords_number keywords"
+#echo "Processing $files_number files with $keywords_number keywords"
 echo "Percentage% =" `expr $((($i/$total_repeats)*100))`
 
-############################## GREP SEARCH #####################################
+############################## PATTERN SEARCH #####################################
 
 gunzip -c $files | ./search_engine.awk $user_keywords - > $output
 
 ################################################################################
+
+#i=0
 #while IFS= read -r keyword; do # there is a text file containing the keywords, each line has a keyword
 #  
 #
@@ -114,7 +114,7 @@ gunzip -c $files | ./search_engine.awk $user_keywords - > $output
 time_end=`date +%s`
 time_exec=`expr $(( $time_end - $time_start ))`
 
-echo "PubMed Trends file created! Execution time was $time_exec seconds"
+echo "D|G analysis file created! Execution time was $time_exec seconds"
 echo "Plotting results..."
 
 ########################### CALLING R SCRIPT #####################################
