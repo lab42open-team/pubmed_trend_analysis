@@ -20,6 +20,7 @@
 suppressPackageStartupMessages({
     library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
     library(Matrix) # version Matrix 1.2-15
+    library(igraph)
 })
 
 ## file loading. Plotting takes two arguments,
@@ -27,11 +28,12 @@ suppressPackageStartupMessages({
 ## 2) prefix for the plots names
 
 args <- commandArgs(trailingOnly=TRUE)
+args <- c("../data/beach_analysis.tsv","beach_analysis")
 user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
-colnames(trends_pubmed) <- c("year","PMID","keyword")
+colnames(trends_pubmed) <- c("PMID","year","keyword")
 
 ## bar plot of keyword frequencies
 
@@ -73,10 +75,9 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
 
-n_papers_pubmed <- 29562128 # number of unique papers in PubMed. Must be updated when PubMed will be refreshed!!!!!!!
+n_papers_pubmed <- 32304541 # number of unique papers in PubMed. Must be updated when PubMed will be refreshed!!!!!!!
 
 keywords_n_papers <- papers_keywords_network %>% group_by(keyword) %>% summarise(n_papers=n()) %>% mutate(freq=n_papers/n_papers_pubmed) 
-
 
 
 # create a matrix class spMatrix (handles better sparse matrices) to do inverse table multiplication
@@ -96,6 +97,18 @@ keywords_heatmap <- as.data.frame(as.matrix(keywords_heatmap))
 
 # transform to long format for plotting and remove zero's and NA's and assign -1 to loops (self occurrence)
 keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) %>% filter(count!=0,colname!=rowname) %>% na.omit()
+
+######################################### Network analysis ###########################################
+
+coword_graph <- graph_from_adjacency_matrix(as.matrix(keywords_heatmap),weighted=T, mode="undirected")
+
+coword_graph <- simplify(coword_graph,remove.loops=T)
+
+V(coword_graph)$degree <- degree(coword_graph)
+V(coword_graph)$betweenness <- betweenness(coword_graph, weights=NA)
+V(coword_graph)$betweenness_w <- betweenness(coword_graph,weights=E(coword_graph)$weight)
+V(coword_graph)$closeness <- closeness(coword_graph)
+
 
 ######################################### Heatmap plotting ###########################################
 
