@@ -21,6 +21,8 @@ suppressPackageStartupMessages({
     library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
     library(Matrix) # version Matrix 1.2-15
     library(igraph)
+    library(ggraph)
+    library(tidygraph)
 })
 
 ## file loading. Plotting takes two arguments,
@@ -104,11 +106,42 @@ coword_graph <- graph_from_adjacency_matrix(as.matrix(keywords_heatmap),weighted
 
 coword_graph <- simplify(coword_graph,remove.loops=T)
 
-V(coword_graph)$degree <- degree(coword_graph)
+### Centralities calculation
+
+V(coword_graph)$Degree <- degree(coword_graph)
 V(coword_graph)$betweenness <- betweenness(coword_graph, weights=NA)
 V(coword_graph)$betweenness_w <- betweenness(coword_graph,weights=E(coword_graph)$weight)
 V(coword_graph)$closeness <- closeness(coword_graph)
+V(coword_graph)$transitivity <- transitivity(coword_graph,type="local", weights=E(coword_graph)$weight)
+V(coword_graph)$page_rank <- page_rank(coword_graph)$vector
 
+E(coword_graph)$link_width <- as_tibble(round(log(E(coword_graph)$weight),2)) %>% mutate(value=if_else(value==0,0.5,value)) %>% mutate(value=value/max(value)) %>% pull(value)
+
+layout_circle <- layout_in_circle(coword_graph)
+layout_fr <- layout_with_fr(coword_graph)
+layout_nice <- layout_nicely(coword_graph)
+
+
+coword_graph_tidy <- as_tbl_graph(coword_graph)
+
+p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
+        geom_edge_link(aes(edge_color=weight))+
+        scale_edge_color_continuous(low="gray90", high="gray20")+
+#        scale_edge_colour_continuous(low = "white", high = "black" na.value = "grey50")+
+#        geom_node_text(aes(label = name), , repel = TRUE)+
+        geom_node_point(aes(size=Degree), colour="darkgoldenrod")+
+        coord_fixed()+
+        theme_graph()
+
+p <- p + geom_node_text(aes(label = name), nudge_x = p$data$x * .15, nudge_y = p$data$y * .15)
+
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+
+
+
+#png(file=paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network_circular.png"), width = 25, height = 25, units='cm',res=300)
+#plot(coword_graph, vertex.label=V(coword_graph)$name, vertex.size=V(coword_graph)$degree, vertex.label.cex=.9,vertex.color= "lightblue", vertex.frame.color="white", edge.size=E(coword_graph)$weights, layout=layout_circle)
+#dev.off()
 
 ######################################### Heatmap plotting ###########################################
 
