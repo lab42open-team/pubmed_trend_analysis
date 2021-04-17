@@ -1,7 +1,7 @@
 #! /usr/bin/gawk -f
 # Author Savvas Paragkamian
 #
-# Run :  gunzip -c dataset/*.tsv.gz | ./scripts/search_engine.awk keywords.txt - > results.tsv
+# Run :  gunzip -c path-to-pubmed/*.tsv.gz | ./scripts/search_engine.awk keywords.txt - > results.tsv
 # Note the - , it takes the input from the pipe |
 #
 BEGIN {
