@@ -69,9 +69,6 @@ echo 'Data will be stored in ' $output
 files=$(find $pubmed_path -name \*.tsv.gz) # the files that we will search for patterns in the directory that they are stored
 files_number=`find $pubmed_path -name \*.tsv.gz| wc -l`
 
-total_repeats=$(($keywords_number*$files_number))
-
-
 ############################## PATTERN SEARCH #####################################
 
 gunzip -c $files | ./search_engine.awk $user_keywords - > $output
