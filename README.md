@@ -43,7 +43,7 @@ But these keywords need regular expressions to retrive also plural forms suffixe
 
 ## Prerequisites
 
-In bash the the search is done by the ``` zgrep ``` command and results are written in a file using ``` awk ```.
+In bash the the search is done in awk patterm ```match``` command and results are written in a file after being checked for duplicates and missing information.
 
 For results file transformation, statistics and plotting we used R version 3.5.2 and the ``` tidyverse 1.3.0 ``` packages ``` readr, dplyr, ggplot2, tidyr```.
 
@@ -53,13 +53,13 @@ The analysis is divided in two scripts, one shell script for keyword mining and 
 
 The user is necessary to pass 3 arguments in the executable bash script. These arguments are passed through flags
 
-* -k | --keywords, expects a the path of the txt file with the keywords
-* -d | --data, expects the path to the PubMed data
-* -p | --prefix, expects a string with prefix of all the generated files (txt and plots)
+* -k |  expects a the path of the txt file with the keywords
+* -d |  expects the absolute path to the PubMed data
+* -p |  expects a string with prefix of all the generated files (txt and plots)
 
 
 ```
-./trend_analysis.sh -k keywords.txt -d default -p "ecology_trends"
+./scripts/dig_analysis.sh -k keywords.txt -d ~/dig_analysis/dataset -p "ecology_trends"
 
 ```
 
@@ -67,7 +67,7 @@ When indexing is finished the script calls the r script to generate the plots.
 
 ### Search
 
-The heart of the search is the ```grep``` function. We used ```grep -ni```, -i for case insensitive search and -n to return the whole line of the file if a match is found. This basic form of grep in the aformantioned keywords is able to find plurals
+The heart of the search is the ```match``` function after all abstracts and titles where transformed to lower letters.
 
 ### Plots
 
@@ -97,6 +97,7 @@ In order to find the co-mention frequencies we used a simple matrix multiplicati
 Because the difference of keywords distance can be several orders of multitude we plotted the log2 values to reduce the divergence.
 
 ![Heatmap in log scale](demo/species_2020-04-14_03-17_log_pubmed_keyword_heatmap.png)
+
 
 #### Jaccard similarity
 
