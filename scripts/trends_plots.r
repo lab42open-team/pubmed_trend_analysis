@@ -30,7 +30,6 @@ suppressPackageStartupMessages({
 ## 2) prefix for the plots names
 
 args <- commandArgs(trailingOnly=TRUE)
-args <- c("../data/beach_analysis.tsv","beach_analysis")
 user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
