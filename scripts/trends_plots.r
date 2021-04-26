@@ -30,18 +30,11 @@ fuppressPackageStartupMessages({
 ## 2) prefix for the plots names
 
 args <- commandArgs(trailingOnly=TRUE)
-# remove!
-args <- c("../data/beach_analysis.tsv","beach_analysis")
-# END remove!
 user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
 colnames(trends_pubmed) <- c("PMID","year","keyword")
-
-trends_categories <- read_delim("../all_beach_litter.txt", delim="\t", col_names=F,col_types = cols())
-trends_pubmed <- trends_pubmed %>% dplyr::left_join(.,trends_categories, by=c("keyword"="X1"))
-
 
 ## bar plot of keyword frequencies
 
