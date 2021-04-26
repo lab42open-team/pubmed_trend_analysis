@@ -31,7 +31,7 @@ fuppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/beach_analysis.tsv","beach_analysis")
+args <- c("../data/beach_analysis.tsv","beach_litter")
 # END remove!
 user_prefix <- args[2]
 
@@ -42,15 +42,19 @@ colnames(trends_pubmed) <- c("PMID","year","keyword")
 trends_categories <- read_delim("../all_beach_litter.txt", delim="\t", col_names=F,col_types = cols())
 trends_pubmed <- trends_pubmed %>% dplyr::left_join(.,trends_categories, by=c("keyword"="X1"))
 
+color_palette <- c("#e66101","#fdb863", "#5e3c99")
 
+colnames(trends_pubmed) <- c("PMID","year","keyword","category")
 ## bar plot of keyword frequencies
 
-trends_counts <- trends_pubmed %>% distinct(PMID,keyword) %>% group_by(keyword) %>% summarise(counts=n())
+trends_counts <- trends_pubmed %>% distinct(PMID,keyword,category) %>% group_by(keyword,category) %>% summarise(counts=n())
+trends_counts$keyword <- fct_reorder(trends_counts$keyword,trends_counts$category)
 
 pubmed_keyword_frequency <- ggplot()+
-    geom_col(data=trends_counts,aes(x=keyword,y=counts),width=0.8)+
-    geom_text(data=trends_counts,aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
+    geom_col(data=trends_counts,stat="identity",aes(x=keyword,y=counts, fill=category),width=0.8)+
+    geom_text(data=trends_counts, aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
     scale_y_continuous(name="Number of papers",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
+    scale_fill_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphology"="#fdb863"))+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
@@ -58,7 +62,7 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
 
 
 ## trends per year
-keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,year) %>% group_by(year, keyword) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword) %>% mutate(cumulative_counts=cumsum(counts))
+keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts))
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
 pubmed_keyword_per_year <- ggplot()+
@@ -106,12 +110,20 @@ keywords_heatmap <- as.data.frame(as.matrix(keywords_heatmap))
 # transform to long format for plotting and remove zero's and NA's and assign -1 to loops (self occurrence)
 keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) %>% filter(count!=0,colname!=rowname) %>% na.omit()
 
+colnames(keywords_heatmap_long) <- c("from","to","count")
+
+edge_weight_summary <- summary(keywords_heatmap_long$count)
+#keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(as.vector(edge_weight_summary[3]), as.vector(edge_weight_summary[5]), 100, 200, 400, as.vector(edge_weight_summary[6])),labels=c("1-5","6-22", "22-100", "100-200","200-400","800"))
+keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,25, 100, 200, 400, 850),labels=c("1-5","6-20", "20-100", "100-200","200-400","800"))
+
 ######################################### Network analysis ###########################################
 
-coword_graph <- graph_from_adjacency_matrix(as.matrix(keywords_heatmap),weighted=T, mode="undirected")
+#coword_graph <- graph_from_adjacency_matrix(as.matrix(keywords_heatmap),weighted=T, mode="undirected")
+colnames(trends_counts) <- c("name","category","abstracts" )
 
-coword_graph <- simplify(coword_graph,remove.loops=T)
+coword_graph <- graph_from_data_frame(keywords_heatmap_long, directed=FALSE, vertices=trends_counts)
 
+V(coword_graph)$color <- V(coword_graph)$category
 ### Centralities calculation
 
 V(coword_graph)$Degree <- degree(coword_graph)
@@ -121,28 +133,27 @@ V(coword_graph)$closeness <- closeness(coword_graph)
 V(coword_graph)$transitivity <- transitivity(coword_graph,type="local", weights=E(coword_graph)$weight)
 V(coword_graph)$page_rank <- page_rank(coword_graph)$vector
 
-E(coword_graph)$link_width <- as_tibble(round(log(E(coword_graph)$weight),2)) %>% mutate(value=if_else(value==0,0.5,value)) %>% mutate(value=value/max(value)) %>% pull(value)
+E(coword_graph)$link_width <- as_tibble(round(log(E(coword_graph)$count),2)) %>% mutate(value=if_else(value==0,0.5,value)) %>% mutate(value=value/max(value)) %>% pull(value)
 
 layout_circle <- layout_in_circle(coword_graph)
 layout_fr <- layout_with_fr(coword_graph)
 layout_nice <- layout_nicely(coword_graph)
 
-
 coword_graph_tidy <- as_tbl_graph(coword_graph)
 
 p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
-        geom_edge_link(aes(edge_color=weight))+
-        scale_edge_color_continuous(low="gray90", high="gray20")+
+        geom_edge_link(aes(edge_color=count_bin,edge_width = count))+
+        geom_node_point(aes(size=Degree, colour=category))+
+#        scale_edge_color_continuous(low="#bae4bc", high="#0868ac")+
 #        scale_edge_colour_continuous(low = "white", high = "black" na.value = "grey50")+
 #        geom_node_text(aes(label = name), , repel = TRUE)+
-        geom_node_point(aes(size=Degree), colour="darkgoldenrod")+
+        scale_edge_width(range = c(0.2,2))+
         coord_fixed()+
         theme_graph()
 
 p <- p + geom_node_text(aes(label = name), nudge_x = p$data$x * .15, nudge_y = p$data$y * .15)
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
-
 
 
 #png(file=paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network_circular.png"), width = 25, height = 25, units='cm',res=300)
