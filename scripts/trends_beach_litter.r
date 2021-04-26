@@ -141,17 +141,19 @@ layout_nice <- layout_nicely(coword_graph)
 
 coword_graph_tidy <- as_tbl_graph(coword_graph)
 
-p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
+#p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
+#p <- ggraph(coword_graph_tidy,layout = 'stress') +
+p <- ggraph(coword_graph_tidy,layout = "centrality",cent = graph.strength(coword_graph_tidy)) +
         geom_edge_link(aes(edge_color=count_bin,edge_width = count))+
-        geom_node_point(aes(size=Degree, colour=category))+
+        geom_node_point(aes(size=Degree, shape=category))+
 #        scale_edge_color_continuous(low="#bae4bc", high="#0868ac")+
 #        scale_edge_colour_continuous(low = "white", high = "black" na.value = "grey50")+
 #        geom_node_text(aes(label = name), , repel = TRUE)+
-        scale_edge_width(range = c(0.2,2))+
+        scale_edge_width(range = c(0.1,2))+
         coord_fixed()+
         theme_graph()
 
-p <- p + geom_node_text(aes(label = name), nudge_x = p$data$x * .15, nudge_y = p$data$y * .15)
+p <- p + geom_node_text(aes(label = name),repel = TRUE, nudge_x = p$data$x * .15, nudge_y = p$data$y * .15)
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
