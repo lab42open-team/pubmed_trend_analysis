@@ -17,7 +17,7 @@
 #
 # Packages
 
-fuppressPackageStartupMessages({
+suppressPackageStartupMessages({
     library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
     library(Matrix) # version Matrix 1.2-15
     library(igraph)
@@ -142,18 +142,20 @@ layout_nice <- layout_nicely(coword_graph)
 coword_graph_tidy <- as_tbl_graph(coword_graph)
 
 #p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
-#p <- ggraph(coword_graph_tidy,layout = 'stress') +
-p <- ggraph(coword_graph_tidy,layout = "centrality",cent = graph.strength(coword_graph_tidy)) +
-        geom_edge_link(aes(edge_color=count_bin,edge_width = count))+
-        geom_node_point(aes(size=Degree, shape=category))+
-#        scale_edge_color_continuous(low="#bae4bc", high="#0868ac")+
-#        scale_edge_colour_continuous(low = "white", high = "black" na.value = "grey50")+
-#        geom_node_text(aes(label = name), , repel = TRUE)+
-        scale_edge_width(range = c(0.1,2))+
-        coord_fixed()+
-        theme_graph()
+#p <- p + geom_node_text(aes(label = name),repel = TRUE)#, nudge_x = p$data$x * .15, nudge_y = p$data$y * 25)
+#p <- ggraph(coword_graph_tidy,layout = "centrality",cent = graph.strength(coword_graph_tidy)) +
 
-p <- p + geom_node_text(aes(label = name),repel = TRUE, nudge_x = p$data$x * .15, nudge_y = p$data$y * .15)
+p <- ggraph(coword_graph_tidy,layout = 'stress') +
+        geom_edge_link(aes(edge_color=count,edge_width = count))+
+        geom_node_point(aes(size=Degree, shape=category, color=category))+
+        scale_edge_color_continuous(low="#bdbdbd", high="#636363")+
+        geom_node_text(aes(color=category,label = name),fontface = "bold" , nudge_y = 0.1, check_overlap = TRUE, show.legend=FALSE)+
+        scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphology"="#fdb863"))+
+        scale_edge_width(range = c(0.1,2))+
+        guides(edge_color= guide_legend("Edge width",order = 3),edge_width=guide_legend("Edge width",order = 3), shape=guide_legend("Category",order = 1),color=guide_legend("Category",order = 1), size=guide_legend("Keyword co-occurrence",order = 2))+
+        theme_graph()+
+        coord_cartesian(clip = "off")+
+        theme(legend.position = "bottom")
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
