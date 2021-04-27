@@ -98,6 +98,7 @@ papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PM
 row.names(papers_keywords_matrix) <- levels(factor(papers_keywords_network$PMID))
 colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keyword))
 
+
 # with the inverse cross product we do the projection of the edgelist to keywords in order to calculate how many times keyword pairs appear together in abstracts.
 keywords_heatmap <- tcrossprod(t(papers_keywords_matrix))
 
@@ -113,8 +114,13 @@ keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames
 colnames(keywords_heatmap_long) <- c("from","to","count")
 
 edge_weight_summary <- summary(keywords_heatmap_long$count)
-#keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(as.vector(edge_weight_summary[3]), as.vector(edge_weight_summary[5]), 100, 200, 400, as.vector(edge_weight_summary[6])),labels=c("1-5","6-22", "22-100", "100-200","200-400","800"))
+
+# count bins custom for each case. Here the following seem most appropriate
 keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,25, 100, 200, 400, 850),labels=c("1-5","6-20", "20-100", "100-200","200-400","800"))
+
+# assign the order levels of the count_bin
+keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),levels=rev(levels(keywords_heatmap_long$count_bin)))
+
 
 ######################################### Network analysis ###########################################
 
@@ -152,24 +158,19 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
         geom_node_text(aes(color=category,label = name),fontface = "bold" , nudge_y = 0.1, check_overlap = TRUE, show.legend=FALSE)+
         scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphology"="#fdb863"))+
         scale_edge_width(range = c(0.1,2))+
-        guides(edge_color= guide_legend("Edge width",order = 3),edge_width=guide_legend("Edge width",order = 3), shape=guide_legend("Category",order = 1),color=guide_legend("Category",order = 1), size=guide_legend("Keyword co-occurrence",order = 2))+
+        guides(edge_color= guide_legend("Edge width",order = 3),edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), shape=guide_legend("Category",order = 1),color=guide_legend("Category",order = 1), size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
         theme_graph()+
         coord_cartesian(clip = "off")+
-        theme(legend.position = "bottom")
+        theme(legend.position = c(0.09,0.3),legend.title = element_text(size = 15), legend.text = element_text(size = 14))
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
-
-
-#png(file=paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network_circular.png"), width = 25, height = 25, units='cm',res=300)
-#plot(coword_graph, vertex.label=V(coword_graph)$name, vertex.size=V(coword_graph)$degree, vertex.label.cex=.9,vertex.color= "lightblue", vertex.frame.color="white", edge.size=E(coword_graph)$weights, layout=layout_circle)
-#dev.off()
 
 ######################################### Heatmap plotting ###########################################
 
 # elements of the plot
 
 # we defined here the diagonal because the raw values don't include them. In addition we need the diagonal seperate from the raw data because we will paint it differently
-keywords <- unique(c(keywords_heatmap_long$colname,keywords_heatmap_long$rowname))
+keywords <- unique(c(keywords_heatmap_long$from,keywords_heatmap_long$to))
 diagonal <- tibble(rowname=keywords,colname=keywords,count=-1,jaccard=0) 
 
 ## summaries to dynamically set the break points and limits of the plot
@@ -189,13 +190,13 @@ g <- guide_legend("no of abstracts") # legend title and combination of different
 
 # running the plot
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
-  geom_tile(data=keywords_heatmap_long,aes(x=colname, y=rowname,fill=count),alpha=0, show.legend = F)+
-  geom_point(data=keywords_heatmap_long,aes(x=colname, y=rowname,colour = count, size=count))  +
+  geom_tile(data=keywords_heatmap_long,aes(x=to, y=from,fill=count),alpha=0, show.legend = F)+
+  geom_point(data=keywords_heatmap_long,aes(x=to, y=from,colour = count, size=count))  +
   scale_size(name="co-occurrence",range = c(0.5, 10),breaks=breaks,limits=limits)+
   scale_colour_gradientn(colours =c("steelblue1","yellowgreen","yellow","goldenrod1","orange"),breaks=breaks,limits=limits) +
   geom_point(data=diagonal,aes(x=colname, y=rowname),colour="lightyellow4",size=1,show.legend = F)+
   scale_x_discrete(position = "top")+
-  guides(colour = g, size = g)+
+  guides(colour = guide_legend("# of abstracts"), size = guide_legend("# of abstracts"))+
   ggtitle("Heatmap of co-occurrence of keywords")+
   xlab("") +
   ylab("")+
@@ -205,6 +206,36 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
 
 #write_delim(keywords_heatmap_long,"heatmap_data.txt", delim="\t")
+
+####################################### correlation heatmap ###################################################
+
+### Calculate the Spearman between keywords from the matrix of documents X keywords - papers_keywords_matrix.
+dd <- as.data.frame(as.matrix(papers_keywords_matrix))
+keyword_correlation <- cor(as.data.frame(as.matrix(papers_keywords_matrix)),method="pearson")
+
+keyword_correlation[upper.tri(keyword_correlation)] <- 0
+
+keyword_correlation_long <- as.data.frame(keyword_correlation) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="pearson" ) %>% filter(spearman!=0,colname!=rowname) %>% na.omit()
+
+colnames(keyword_correlation_long) <- c("from","to","pearson")
+
+
+pubmed_keyword_correlation_heatmap <- ggplot()+
+    geom_tile(data=keyword_correlation_long,aes(x=to, y=from,fill=spearman),alpha=1, show.legend = T,colour = "white")+
+    geom_tile(data=diagonal,aes(x=colname, y=rowname), fill="gray80",show.legend = F)+
+#    geom_point(data=keywords_correlation_long,aes(x=to, y=from,colour = spearman, size=spearman))  +
+#    geom_point(data=diagonal,aes(x=colname, y=rowname),colour="lightyellow4",size=1,show.legend = F)+
+    scale_fill_gradient2(low="#ef8a62",mid="#f7f7f7",high="#67a9cf", midpoint = 0)+
+    scale_x_discrete(position = "top")+
+#    guides(colour = g, size = g)+
+    ggtitle("Heatmap of Pearson correlation of keywords")+
+    xlab("") +
+    ylab("")+
+    theme_bw()+
+    theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_correlation_heatmap.png"), plot = pubmed_keyword_correlation_heatmap, device = "png", dpi = 150)
+
 
 ####################################### running the log2 heatmap ###################################################
 ### log2 transformation was the best way to gather together counts. Log10 was too aggresive and sqrt too soft.
