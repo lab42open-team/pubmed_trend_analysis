@@ -20,32 +20,41 @@ The output of the ftp method are multiple xml files which then were transformed 
 A .txt file with the following keywords is read from the bash script
 
 ```
-microbiome
-text mining
-biogeochemical cycle
-biogeochemistry
-metabolism
-metabolome
-data mining
-ecosystem
-ecosystem function
-ecosystem service
-flux balance analysis
-biodiversity
-flux
-metabolic process
-microbial ecology
-environment
-omics
-ecology
+litter
+marine litter
+plastic
+macroplastic
+microplastic
+nanoplastic
+beach
+beach width
+beach slope
+beach exposure
+morphodynamic
+sand grain size
+sublittoral
+littoral
+littoral zone
+intertidal
+dune
+fauna
+talitrid apphipod
+donacid clam
+bird nest
+turtle nest
+turtle
+ghost crab
+polychaetes
+clam
+beetle
+talitrid
 ```
-But these keywords need regular expressions to retrive also plural forms suffixes and complex words
 
 ## Prerequisites
 
 In bash the the search is done in awk patterm ```match``` command and results are written in a file after being checked for duplicates and missing information.
 
-For results file transformation, statistics and plotting we used R version 3.5.2 and the ``` tidyverse 1.3.0 ``` packages ``` readr, dplyr, ggplot2, tidyr```.
+For results file transformation, statistics and plotting we used R version 3.5.2 and the ``` tidyverse 1.3.0 ``` packages ``` readr, dplyr, ggplot2, tidyr```. For the network analysis the R packages ```Matrix```, ```igraph```,```tidygraph``` and ```gggraph``` are used.
 
 ## Running
 
@@ -77,11 +86,11 @@ Three types of plots are created to provide insight to trends of the specific ke
 
 In how many abstracts in PubMed each keyword is mentioned?
 
-![Keyword mentions in PubMed](demo/species_2020-04-14_03-10_pubmed_keyword_frequency.png)
+![Keyword mentions in PubMed](demo/key_freq.png)
 
 How many abstracts are published each year that contain each keyword?
 
-![Keywords per year in PubMed](demo/species_2020-04-14_03-10_pubmed_keyword_per_year.png)
+![Keywords per year in PubMed](demo/key_time_heatmap.png)
 
 #### Heatmap
 
@@ -92,24 +101,30 @@ This question is awnsered with heatmaps, which illustrate the co-mention frequen
 In order to find the co-mention frequencies we used a simple matrix multiplication. We start from an edgelist containing 2 columns, one with article ID's and one with keywords. We transform this edgelist to a n*m matrix and fill it with 0's and 1's whether a keyword is absent from an article or present, respectively. Then we multiplied this matrix with it's transposed matrix resulting in keyword co-mention frequencies. This method is also called one mode projection of a bipartite graph in graph theory.
 
 
-![Heatmap](demo/species_2020-04-14_03-17_pubmed_keyword_heatmap.png)
+![Heatmap](demo/heatmap.png)
 
 Because the difference of keywords distance can be several orders of multitude we plotted the log2 values to reduce the divergence.
 
-![Heatmap in log scale](demo/species_2020-04-14_03-17_log_pubmed_keyword_heatmap.png)
+![Heatmap in log scale](demo/heatmap_log.png)
 
 
 #### Jaccard similarity
 
 We also wanted to quantify the co-mention of keywords in terms of similarity. We choose the Jaccard similarity because is intuitive and easy to calculate; it is defined as the intersection over the union of two sets. Hence it is located in the [0,1] space.
 
-![Heatmap with Jaccard similarity](demo/species_2020-04-14_03-17_pubmed_jaccard_heatmap.png)
+![Heatmap with Jaccard similarity](demo/heatmap_jaccard.png)
 
 #### Random expectation 
 
-In this heatmap we compare the co-mention frequency with random expectation. 
+In this heatmap we compare the co-mention frequency with random expectation.
 
 All frequencies are measured with the total unique abstracts in PubMed.
+
+## Network analysis
+
+The previous heatmaps are the basic representations of networks. Therefore the co-occurrence matrix can be used for network analysis. Here we analyse the keyword network. The network contains other information apart from the number of co-occurrences, it contains information of the degree that a keyword is co-mentioned with the other keyworks. Clusters also can be identified. 
+
+![Network of keywords](demo/net.png)
 
 ## Two Keyword co-occurences
 
@@ -118,5 +133,25 @@ Sometimes it is insightful to view keyword co-occurences per year to view the tr
 ```
 Rscript trends_2_keywords_plot.r data_file "keyword1" "keyword2" "file_prefix"
 
+```
+## Licence
+
+This workflow is under the GNU GPLv3 license (for 3rd party components separate licenses apply).
+
+```
+    Copyright (C) 2021 Savvas Paragkamian
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, [see](http://www.gnu.org/licenses).
 ```
 

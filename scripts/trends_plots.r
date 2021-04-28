@@ -17,7 +17,7 @@
 #
 # Packages
 
-suppressPackageStartupMessages({
+fuppressPackageStartupMessages({
     library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
     library(Matrix) # version Matrix 1.2-15
     library(igraph)
