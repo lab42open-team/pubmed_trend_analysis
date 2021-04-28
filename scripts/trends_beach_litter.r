@@ -41,11 +41,12 @@ colnames(trends_pubmed) <- c("PMID","year","keyword")
 
 categories_colors <- tibble(category=c("litter","fauna","morphology"),color=c("#5e3c99","#e66101","#fdb863"))
 trends_categories <- read_delim("../all_beach_litter.txt", delim="\t", col_names=F,col_types = cols())
-trends_pubmed <- trends_pubmed %>% dplyr::left_join(.,trends_categories, by=c("keyword"="X1"))
 
-color_palette <- c("#e66101","#fdb863", "#5e3c99")
+## filter only the keywords that are listed in the trends_categories and then join them to keep the general categories
+trends_pubmed <- trends_pubmed %>% filter(keyword %in% trends_categories$X1) %>% dplyr::left_join(.,trends_categories, by=c("keyword"="X1"))
 
 colnames(trends_pubmed) <- c("PMID","year","keyword","category")
+color_palette <- c("#e66101","#fdb863", "#5e3c99")
 ## bar plot of keyword frequencies
 
 trends_counts <- trends_pubmed %>% distinct(PMID,keyword,category) %>% group_by(keyword,category) %>% summarise(counts=n())
@@ -55,9 +56,9 @@ pubmed_keyword_frequency <- ggplot()+
     geom_col(data=trends_counts,aes(x=keyword,y=counts, fill=category),width=0.8)+
     geom_text(data=trends_counts, aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
     scale_y_continuous(name="# of abstracts",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
-    scale_fill_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphology"="#fdb863"))+
+    scale_fill_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
     theme_bw()+
-    theme(legend.position=c(0.9,0.9),axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
+    theme(legend.position=c(0.85,0.85),axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
 ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 300)
 
@@ -76,7 +77,7 @@ pubmed_keyword_per_year <- ggplot()+
     
 ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_time.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
 
-# cummulative records of keywords in abstracts over the years
+# cumulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=cumulative_counts, color=keyword), show.legend=T)+
     scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
@@ -178,12 +179,12 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
         geom_node_point(aes(size=Degree, shape=category, color=category))+
         scale_edge_color_continuous(low="#bdbdbd", high="#636363")+
         geom_node_text(aes(color=category,label = name),fontface = "bold" , nudge_y = 0.1, check_overlap = TRUE, show.legend=FALSE)+
-        scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphology"="#fdb863"))+
+        scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
         scale_edge_width(range = c(0.1,2))+
         guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), shape=guide_legend("Category",order = 1),color=guide_legend("Category",order = 1), size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
         theme_graph()+
         coord_cartesian(clip = "off")+
-        theme(legend.position = c(0.09,0.3),legend.title = element_text(size = 15), legend.text = element_text(size = 14))
+        theme(legend.justification = "top",legend.margin=margin(unit(0.2,"cm")),legend.position = "right",legend.title = element_text(size = 15), legend.text = element_text(size = 14))
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
