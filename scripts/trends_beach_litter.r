@@ -63,7 +63,8 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
 
 
 ## trends per year
-keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts)) %>% 
+keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts)) %>% ungroup() %>% mutate(keyword=factor(keyword,levels=rev(trends_categories$X1))) %>% mutate(count_bin=cut(keywords_per_year$counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
+
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
 pubmed_keyword_per_year <- ggplot()+
@@ -88,17 +89,20 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),
 ### timeline heatmap
 ###
 
-keywords_per_year$count_bin <- cut(keywords_per_year$counts, breaks=c(0,10, 50, 100, 500, 1000, max(keywords_per_year$counts,na.rm=T)),labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<"))
-
 pubmed_keyword_per_year_heatmap <- ggplot()+
-    geom_tile(data=keywords_per_year, aes(x=year,y=keyword, fill=count_bin), show.legend=T)+
-#    scale_x_discrete(expand=c(0,0),breaks=c("1950","1960","1970","1980","1990","2000","2010","2020"))+
-    #scale_fill_manual(values=c("#d53e4f","#f46d43","#fdae61","#fee08b","#e6f598","#abdda4","#ddf1da"),na.value = 
+    geom_tile(data=keywords_per_year, aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
+    scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
+    scale_y_discrete(expand=c(0,0))+
     #scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
-    theme_bw()
+    scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
+    ylab("")+
+    xlab("")+
+    coord_equal()+
+    theme_bw()+
+    guides(fill=guide_legend(title="# abstracts"))+
+    theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), legend.position="right",legend.direction="vertical",legend.key.height=unit(0.8,"cm"),legend.key.width = unit(0.2,"cm"),plot.margin=margin(0,0,0,0,"cm"))
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_heatmap.png"), plot =pubmed_keyword_per_year_heatmap , device = "png", dpi = 150)
-
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_heatmap.png"), plot =pubmed_keyword_per_year_heatmap , width = 30, height = 15, units='cm',device = "png", dpi = 300)
 
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
