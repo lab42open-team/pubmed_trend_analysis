@@ -57,6 +57,7 @@ pubmed_keyword_frequency <- ggplot()+
     geom_text(data=trends_counts, aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
     scale_y_continuous(name="# of abstracts",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
     scale_fill_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
+    guides(fill=guide_legend(title="Compound"))+
     theme_bw()+
     theme(legend.position=c(0.85,0.85),axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
@@ -94,7 +95,6 @@ pubmed_keyword_per_year_heatmap <- ggplot()+
     geom_tile(data=keywords_per_year, aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
     scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
     scale_y_discrete(expand=c(0,0))+
-    #scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
     scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
     ylab("")+
     xlab("")+
@@ -181,7 +181,7 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
         geom_node_text(aes(color=category,label = name),fontface = "bold" , nudge_y = 0.1, check_overlap = TRUE, show.legend=FALSE)+
         scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
         scale_edge_width(range = c(0.1,2))+
-        guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), shape=guide_legend("Category",order = 1),color=guide_legend("Category",order = 1), size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
+        guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), shape=guide_legend("Compound",order = 1),color=guide_legend("Compound",order = 1), size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
         theme_graph()+
         coord_cartesian(clip = "off")+
         theme(legend.justification = "top",legend.margin=margin(unit(0.2,"cm")),legend.position = "right",legend.title = element_text(size = 15), legend.text = element_text(size = 14))
