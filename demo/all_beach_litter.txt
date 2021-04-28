@@ -1,0 +1,26 @@
+marine litter	litter
+nanoplastic	litter
+litter	litter
+plastic	litter
+macroplastic	litter
+microplastic	litter
+dune	Littoral Active Zone
+beach slope	morphodynamic state
+beach	Littoral Active Zone
+sublittoral	Littoral Active Zone
+sand grain size	morphodynamic state
+intertidal	Littoral Active Zone
+littoral zone	Littoral Active Zone
+littoral	Littoral Active Zone
+morphodynamic	morphodynamic state
+beach exposure	morphodynamic state
+beach width	morphodynamic state
+turtle nest	fauna
+beetle	fauna
+clam	fauna
+talitrid	fauna
+ghost crab	fauna
+polychaetes	fauna
+turtle	fauna
+fauna	fauna
+bird nest	fauna
