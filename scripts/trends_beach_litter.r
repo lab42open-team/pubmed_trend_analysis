@@ -59,7 +59,7 @@ pubmed_keyword_frequency <- ggplot()+
     theme_bw()+
     theme(legend.position=c(0.9,0.9),axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_frequency.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 300)
+ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 300)
 
 
 ## trends per year
@@ -74,7 +74,7 @@ pubmed_keyword_per_year <- ggplot()+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
     
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
+ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_time.png"), plot = pubmed_keyword_per_year, device = "png", dpi = 150)
 
 # cummulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
@@ -83,7 +83,7 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_cum.png"), plot = pubmed_keyword_per_year_cumulative, device = "png", dpi = 150)
 
 ################################## Heatmaps #############################
 
@@ -102,7 +102,7 @@ pubmed_keyword_per_year_heatmap <- ggplot()+
     guides(fill=guide_legend(title="# abstracts"))+
     theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), legend.position="right",legend.direction="vertical",legend.key.height=unit(0.8,"cm"),legend.key.width = unit(0.2,"cm"),plot.margin=margin(0,0,0,0,"cm"))
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_heatmap.png"), plot =pubmed_keyword_per_year_heatmap , width = 30, height = 12, units='cm',device = "png", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap.png"), plot =pubmed_keyword_per_year_heatmap , width = 30, height = 12, units='cm',device = "png", dpi = 300)
 
 
 #################################### Co-occerrence of keywords #####################################
@@ -185,7 +185,7 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
         coord_cartesian(clip = "off")+
         theme(legend.position = c(0.09,0.3),legend.title = element_text(size = 15), legend.text = element_text(size = 14))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 ######################################### Heatmap plotting ###########################################
 
@@ -229,7 +229,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   theme_bw()+
   theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
 
 #write_delim(keywords_heatmap_long,"heatmap_data.txt", delim="\t")
 
@@ -258,7 +258,7 @@ pubmed_keyword_correlation_heatmap <- ggplot()+
     theme_bw()+
     theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_correlation_heatmap.png"), plot = pubmed_keyword_correlation_heatmap, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_cor.png"), plot = pubmed_keyword_correlation_heatmap, device = "png", dpi = 150)
 
 
 ####################################### running the log2 heatmap ###################################################
@@ -290,7 +290,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_log_pubmed_keyword_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_log.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
 
 ################################ Jaccard Index ######################################
 
@@ -314,7 +314,7 @@ pubmed_jaccard_heatmap <- ggplot()+
     theme_bw()+
     theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_jaccard_heatmap.png"), plot = pubmed_jaccard_heatmap, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_jaccard.png"), plot = pubmed_jaccard_heatmap, device = "png", dpi = 150)
 
 
 
@@ -334,6 +334,6 @@ pubmed_random_heatmap <- ggplot()+
     theme_bw()+
     theme(panel.grid.major = element_blank(), panel.grid.minor=element_blank(),axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.8, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_random_heatmap.png"), plot = pubmed_random_heatmap, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_random.png"), plot = pubmed_random_heatmap, device = "png", dpi = 150)
 
 
