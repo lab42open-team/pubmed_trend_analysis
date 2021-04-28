@@ -30,7 +30,6 @@ beach
 beach width
 beach slope
 beach exposure
-beach geomorphology
 morphodynamic
 sand grain size
 sublittoral
@@ -87,11 +86,11 @@ Three types of plots are created to provide insight to trends of the specific ke
 
 In how many abstracts in PubMed each keyword is mentioned?
 
-![Keyword mentions in PubMed](demo/beach_litter_2021-04-28_16-49_pubmed_keyword_frequency.png)
+![Keyword mentions in PubMed](demo/key_freq.png)
 
 How many abstracts are published each year that contain each keyword?
 
-![Keywords per year in PubMed](demo/beach_litter_2021-04-28_16-49_pubmed_keyword_per_year_heatmap.png)
+![Keywords per year in PubMed](demo/key_time_heatmap.png)
 
 #### Heatmap
 
@@ -102,18 +101,18 @@ This question is awnsered with heatmaps, which illustrate the co-mention frequen
 In order to find the co-mention frequencies we used a simple matrix multiplication. We start from an edgelist containing 2 columns, one with article ID's and one with keywords. We transform this edgelist to a n*m matrix and fill it with 0's and 1's whether a keyword is absent from an article or present, respectively. Then we multiplied this matrix with it's transposed matrix resulting in keyword co-mention frequencies. This method is also called one mode projection of a bipartite graph in graph theory.
 
 
-![Heatmap](demo/beach_litter_2021-04-28_16-49_pubmed_keyword_heatmap.png)
+![Heatmap](demo/heatmap.png)
 
 Because the difference of keywords distance can be several orders of multitude we plotted the log2 values to reduce the divergence.
 
-![Heatmap in log scale](demo/beach_litter_2021-04-28_16-49_log_pubmed_keyword_heatmap.png)
+![Heatmap in log scale](demo/heatmap_log.png)
 
 
 #### Jaccard similarity
 
 We also wanted to quantify the co-mention of keywords in terms of similarity. We choose the Jaccard similarity because is intuitive and easy to calculate; it is defined as the intersection over the union of two sets. Hence it is located in the [0,1] space.
 
-![Heatmap with Jaccard similarity](demo/beach_litter_2021-04-28_16-49_pubmed_jaccard_heatmap.png)
+![Heatmap with Jaccard similarity](demo/heatmap_jaccard.png)
 
 #### Random expectation 
 
@@ -125,7 +124,7 @@ All frequencies are measured with the total unique abstracts in PubMed.
 
 The previous heatmaps are the basic representations of networks. Therefore the co-occurrence matrix can be used for network analysis. Here we analyse the keyword network. The network contains other information apart from the number of co-occurrences, it contains information of the degree that a keyword is co-mentioned with the other keyworks. Clusters also can be identified. 
 
-![Network of keywords](demo/beach_litter_2021-04-28_16-49_pubmed_keyword_network.png)
+![Network of keywords](demo/net.png)
 
 ## Two Keyword co-occurences
 
