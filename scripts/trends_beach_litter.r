@@ -31,22 +31,21 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/beach_analysis.tsv","beach_litter")
+args <- c("../data/total_data.tsv","beach_litter")
 # END remove!
 user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
-colnames(trends_pubmed) <- c("PMID","year","keyword")
+colnames(trends_pubmed) <- c("year","PMID","synonym")
 
 categories_colors <- tibble(category=c("litter","fauna","morphology"),color=c("#5e3c99","#e66101","#fdb863"))
-trends_categories <- read_delim("../all_beach_litter.txt", delim="\t", col_names=F,col_types = cols())
+trends_categories <- read_delim("../keywords.txt", delim="\t", col_names=F,col_types = cols()) %>% arrange(X3)
+colnames(trends_categories) <- c("synonym","keyword","category")
 
-## filter only the keywords that are listed in the trends_categories and then join them to keep the general categories
-trends_pubmed <- trends_pubmed %>% filter(keyword %in% trends_categories$X1) %>% dplyr::left_join(.,trends_categories, by=c("keyword"="X1"))
+## filter only the keywords that are listed in the trends_categories and then join them to keep the general categories. Also remove the the synonyms to keep only the unique number of PMIDs per keyword.
+trends_pubmed <- trends_pubmed %>% filter(synonym %in% trends_categories$synonym) %>% dplyr::left_join(.,trends_categories, by=c("synonym"="synonym")) %>% dplyr::distinct(year,PMID,keyword,category)
 
-colnames(trends_pubmed) <- c("PMID","year","keyword","category")
-color_palette <- c("#e66101","#fdb863", "#5e3c99")
 ## bar plot of keyword frequencies
 
 trends_counts <- trends_pubmed %>% distinct(PMID,keyword,category) %>% group_by(keyword,category) %>% summarise(counts=n())
@@ -65,7 +64,7 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_ke
 
 
 ## trends per year
-keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts)) %>% ungroup() %>% mutate(keyword=factor(keyword,levels=rev(trends_categories$X1))) %>% mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
+keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts)) %>% ungroup() %>% mutate(keyword=factor(keyword,levels=rev(unique(trends_categories$keyword)))) %>% mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
 
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
@@ -139,7 +138,7 @@ colnames(keywords_heatmap_long) <- c("from","to","count")
 edge_weight_summary <- summary(keywords_heatmap_long$count)
 
 # count bins custom for each case. Here the following seem most appropriate
-keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,25, 100, 200, 400, 850),labels=c("1-5","5-20", "20-100", "100-200","200-400","800<"))
+keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,25, 100, 200, 500, 1000),labels=c("1-5","5-20", "20-100", "100-400","400-800","800<"))
 
 # assign the order levels of the count_bin
 keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),levels=rev(levels(keywords_heatmap_long$count_bin)))
@@ -194,9 +193,9 @@ ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_n
 
 # we defined here the diagonal because the raw values don't include them. In addition we need the diagonal seperate from the raw data because we will paint it differently
 
-keywords <- trends_categories %>% filter( X1 %in% unique(c(keywords_heatmap_long$from,keywords_heatmap_long$to))) %>% mutate(from=factor(X1,levels=as.character(X1))) %>% mutate(to=factor(X1,levels=as.character(X1)),count=0,count_bin="0",jaccard=0) %>% dplyr::select(from,to,count,count_bin)
+keywords <- trends_categories %>% filter( keyword %in% unique(c(keywords_heatmap_long$from,keywords_heatmap_long$to))) %>% mutate(from=factor(keyword,levels=as.character(unique(keyword)))) %>% mutate(to=factor(keyword,levels=as.character(unique(unique(keyword)))),count=0,count_bin="0",jaccard=0) %>% dplyr::select(from,to,count,count_bin)
 
-diagonal <- tibble(from=factor(keywords, levels=as.character(trends_categories$X1)),to=factor(keywords, levels=as.character(trends_categories$X1)),count=-1,jaccard=0) 
+diagonal <- tibble(from=factor(keywords, levels=as.character(unique(trends_categories$keyword))),to=factor(keywords, levels=as.character(unique(trends_categories$keyword))),count=-1,jaccard=0) 
 ## summaries to dynamically set the break points and limits of the plot
 
 summary <- broom::tidy(summary(keywords_heatmap_long$count))
@@ -219,7 +218,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords,aes(x=to, y=from),alpha=0.2, show.legend = F)+
 #  geom_point(data=keywords_heatmap_long,aes(x=to, y=from,colour = count, size=count))  +
 #  scale_size(name="co-occurrence",range = c(0.5, 10),breaks=breaks,limits=limits)+
-  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#91bfdb","#4575b4","#e0f3f8")) + #,breaks=breaks,limits=limits) +
+  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
 #  scale_color_manual(values=c("gray80"))+
 #  geom_point(data=diagonal,aes(x=to, y=from),colour="lightyellow4",size=1,show.legend = F)+
   scale_x_discrete(position = "top")+
