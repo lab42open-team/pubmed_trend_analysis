@@ -219,7 +219,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords,aes(x=to, y=from),alpha=0.2, show.legend = F)+
 #  geom_point(data=keywords_heatmap_long,aes(x=to, y=from,colour = count, size=count))  +
 #  scale_size(name="co-occurrence",range = c(0.5, 10),breaks=breaks,limits=limits)+
-  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#e0f3f8","#91bfdb","#4575b4")) + #,breaks=breaks,limits=limits) +
+  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#91bfdb","#4575b4","#e0f3f8")) + #,breaks=breaks,limits=limits) +
 #  scale_color_manual(values=c("gray80"))+
 #  geom_point(data=diagonal,aes(x=to, y=from),colour="lightyellow4",size=1,show.legend = F)+
   scale_x_discrete(position = "top")+
