@@ -138,7 +138,7 @@ colnames(keywords_heatmap_long) <- c("from","to","count")
 edge_weight_summary <- summary(keywords_heatmap_long$count)
 
 # count bins custom for each case. Here the following seem most appropriate
-keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,25, 100, 200, 500, 1000),labels=c("1-5","5-20", "20-100", "100-400","400-800","800<"))
+keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,50, 100, 500, 800, 1000),labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
 
 # assign the order levels of the count_bin
 keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),levels=rev(levels(keywords_heatmap_long$count_bin)))
