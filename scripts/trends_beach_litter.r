@@ -100,7 +100,7 @@ pubmed_keyword_per_year_heatmap <- ggplot()+
     xlab("")+
     coord_equal()+
     theme_bw()+
-    guides(fill=guide_legend(title="# abstracts"))+
+    guides(fill=guide_legend(title="# of abstracts"))+
     theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), legend.position="right",legend.direction="vertical",legend.key.height=unit(0.8,"cm"),legend.key.width = unit(0.2,"cm"),plot.margin=margin(0,0,0,0,"cm"))
    
 ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap.png"), plot =pubmed_keyword_per_year_heatmap , width = 30, height = 12, units='cm',device = "png", dpi = 300)

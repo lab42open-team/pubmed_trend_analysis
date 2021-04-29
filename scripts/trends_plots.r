@@ -17,7 +17,7 @@
 #
 # Packages
 
-fuppressPackageStartupMessages({
+suppressPackageStartupMessages({
     library(tidyverse) # version tidyverse 1.3.0, used packages from tidyverse are readr_1.3.1, ggplot2_3.3.0, dplyr_0.8.5
     library(Matrix) # version Matrix 1.2-15
     library(igraph)
@@ -43,7 +43,7 @@ trends_counts <- trends_pubmed %>% distinct(PMID,keyword) %>% group_by(keyword) 
 pubmed_keyword_frequency <- ggplot()+
     geom_col(data=trends_counts,aes(x=keyword,y=counts),width=0.8)+
     geom_text(data=trends_counts,aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
-    scale_y_continuous(name="Number of papers",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
+    scale_y_continuous(name="Number of abstracts",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
