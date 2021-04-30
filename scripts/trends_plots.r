@@ -28,6 +28,7 @@ suppressPackageStartupMessages({
 ## file loading. Plotting takes two arguments,
 ## 1) file name
 ## 2) prefix for the plots names
+## 3) user keywords file
 
 args <- commandArgs(trailingOnly=TRUE)
 user_prefix <- args[2]
@@ -36,6 +37,7 @@ trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
 colnames(trends_pubmed) <- c("PMID","year","keyword")
 
+trends_categories <- read_delim(args[3], delim="\t", col_names=F,col_types = cols()) %>% arrange(X3)
 ## bar plot of keyword frequencies
 
 trends_counts <- trends_pubmed %>% distinct(PMID,keyword) %>% group_by(keyword) %>% summarise(counts=n())
