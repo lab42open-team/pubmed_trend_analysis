@@ -1,0 +1,184 @@
+from	to	count	count_bin	log2
+beach	amphipod	44	5-50	5.459431618637297
+beach exposure	beach	3	1-5	1.584962500721156
+beach slope	beach	2	1-5	1
+beach width	beach	2	1-5	1
+beetle	amphipod	16	5-50	4
+beetle	beach	22	5-50	4.459431618637297
+bird nest	beetle	1	1-5	0
+clam	amphipod	11	5-50	3.4594316186372973
+clam	beach	60	50-100	5.906890595608519
+clam	beetle	4	1-5	2
+dune	amphipod	2	1-5	1
+dune	beach	174	100-500	7.442943495848728
+dune	beetle	19	5-50	4.247927513443585
+fauna	amphipod	95	50-100	6.569855608330948
+fauna	beach	78	50-100	6.285402218862249
+fauna	beach slope	1	1-5	0
+fauna	beetle	331	100-500	8.370687406807217
+fauna	bird nest	5	1-5	2.321928094887362
+fauna	clam	35	5-50	5.129283016944966
+fauna	dune	34	5-50	5.087462841250339
+ghost crab	beach	16	5-50	4
+ghost crab	clam	1	1-5	0
+ghost crab	dune	2	1-5	1
+ghost crab	fauna	3	1-5	1.584962500721156
+intertidal	amphipod	43	5-50	5.426264754702098
+intertidal	beach	281	100-500	8.134426320220927
+intertidal	beach slope	1	1-5	0
+intertidal	beetle	12	5-50	3.584962500721156
+intertidal	clam	93	50-100	6.539158811108031
+intertidal	dune	10	5-50	3.321928094887362
+intertidal	fauna	105	100-500	6.714245517666122
+intertidal	ghost crab	2	1-5	1
+litter	amphipod	27	5-50	4.754887502163468
+litter	beach	229	100-500	7.839203788096944
+litter	beetle	138	100-500	7.108524456778169
+litter	bird nest	2	1-5	1
+litter	clam	2	1-5	1
+litter	dune	34	5-50	5.087462841250339
+litter	fauna	236	100-500	7.882643049361842
+litter	intertidal	25	5-50	4.643856189774724
+littoral	amphipod	33	5-50	5.044394119358453
+littoral	beach	49	5-50	5.614709844115208
+littoral	beetle	2	1-5	1
+littoral	clam	13	5-50	3.700439718141092
+littoral	dune	11	5-50	3.4594316186372973
+littoral	fauna	63	50-100	5.977279923499917
+littoral	intertidal	69	50-100	6.108524456778169
+littoral	litter	22	5-50	4.459431618637297
+littoral zone	amphipod	4	1-5	2
+littoral zone	beach	2	1-5	1
+littoral zone	dune	1	1-5	0
+littoral zone	fauna	4	1-5	2
+littoral zone	intertidal	4	1-5	2
+littoral zone	litter	2	1-5	1
+littoral zone	littoral	84	50-100	6.392317422778761
+macrolitter	beach	18	5-50	4.169925001442312
+macrolitter	dune	2	1-5	1
+macrolitter	fauna	2	1-5	1
+macrolitter	intertidal	2	1-5	1
+macrolitter	litter	42	5-50	5.392317422778761
+macroplastic	beach	36	5-50	5.169925001442312
+macroplastic	fauna	1	1-5	0
+macroplastic	intertidal	2	1-5	1
+macroplastic	litter	40	5-50	5.321928094887363
+macroplastic	littoral	1	1-5	0
+macroplastic	macrolitter	5	1-5	2.321928094887362
+microlitter	beach	5	1-5	2.321928094887362
+microlitter	litter	13	5-50	3.700439718141092
+microlitter	macrolitter	6	5-50	2.584962500721156
+microlitter	macroplastic	1	1-5	0
+microplastic	amphipod	11	5-50	3.4594316186372973
+microplastic	beach	156	100-500	7.285402218862249
+microplastic	clam	18	5-50	4.169925001442312
+microplastic	dune	3	1-5	1.584962500721156
+microplastic	fauna	28	5-50	4.807354922057604
+microplastic	intertidal	40	5-50	5.321928094887363
+microplastic	litter	98	50-100	6.614709844115208
+microplastic	littoral	6	5-50	2.584962500721156
+microplastic	macrolitter	5	1-5	2.321928094887362
+microplastic	macroplastic	65	50-100	6.022367813028454
+microplastic	microlitter	6	5-50	2.584962500721156
+morphodynamic	amphipod	1	1-5	0
+morphodynamic	beach	27	5-50	4.754887502163468
+morphodynamic	beetle	1	1-5	0
+morphodynamic	dune	7	5-50	2.807354922057604
+morphodynamic	fauna	4	1-5	2
+morphodynamic	intertidal	8	5-50	3
+morphodynamic	litter	2	1-5	1
+morphodynamic	littoral	3	1-5	1.584962500721156
+morphodynamic	macrolitter	1	1-5	0
+nanoplastic	beach	1	1-5	0
+nanoplastic	clam	1	1-5	0
+nanoplastic	fauna	1	1-5	0
+nanoplastic	litter	3	1-5	1.584962500721156
+nanoplastic	macroplastic	5	1-5	2.321928094887362
+nanoplastic	microplastic	43	5-50	5.426264754702098
+plastic	amphipod	15	5-50	3.9068905956085187
+plastic	beach	474	100-500	8.888743248898258
+plastic	beetle	134	100-500	7.066089190457772
+plastic	bird nest	1	1-5	0
+plastic	clam	32	5-50	5
+plastic	dune	24	5-50	4.584962500721156
+plastic	fauna	72	50-100	6.169925001442312
+plastic	ghost crab	1	1-5	0
+plastic	intertidal	73	50-100	6.189824558880018
+plastic	litter	583	500-800	9.187352073200497
+plastic	littoral	20	5-50	4.321928094887363
+plastic	littoral zone	1	1-5	0
+plastic	macrolitter	30	5-50	4.906890595608519
+plastic	macroplastic	146	100-500	7.189824558880018
+plastic	microlitter	9	5-50	3.169925001442312
+plastic	microplastic	991	800<	9.952741247186488
+plastic	morphodynamic	4	1-5	2
+plastic	nanoplastic	104	100-500	6.700439718141092
+polychaetes	amphipod	65	50-100	6.022367813028454
+polychaetes	beach	26	5-50	4.700439718141092
+polychaetes	beetle	1	1-5	0
+polychaetes	clam	21	5-50	4.392317422778761
+polychaetes	fauna	88	50-100	6.459431618637297
+polychaetes	intertidal	86	50-100	6.426264754702098
+polychaetes	litter	3	1-5	1.584962500721156
+polychaetes	littoral	15	5-50	3.9068905956085187
+polychaetes	littoral zone	1	1-5	0
+polychaetes	microlitter	1	1-5	0
+polychaetes	microplastic	7	5-50	2.807354922057604
+polychaetes	morphodynamic	2	1-5	1
+polychaetes	plastic	14	5-50	3.807354922057604
+sand grain size	beach	1	1-5	0
+sand grain size	intertidal	1	1-5	0
+shorebird	amphipod	4	1-5	2
+shorebird	beach	28	5-50	4.807354922057604
+shorebird	beetle	1	1-5	0
+shorebird	clam	5	1-5	2.321928094887362
+shorebird	dune	2	1-5	1
+shorebird	fauna	5	1-5	2.321928094887362
+shorebird	intertidal	47	5-50	5.554588851677638
+shorebird	litter	1	1-5	0
+shorebird	littoral	1	1-5	0
+shorebird	microplastic	2	1-5	1
+shorebird	plastic	3	1-5	1.584962500721156
+shorebird	polychaetes	10	5-50	3.321928094887362
+sublittoral	amphipod	8	5-50	3
+sublittoral	beach	12	5-50	3.584962500721156
+sublittoral	clam	1	1-5	0
+sublittoral	fauna	17	5-50	4.087462841250339
+sublittoral	intertidal	22	5-50	4.459431618637297
+sublittoral	litter	1	1-5	0
+sublittoral	littoral	36	5-50	5.169925001442312
+sublittoral	microplastic	5	1-5	2.321928094887362
+sublittoral	plastic	4	1-5	2
+sublittoral	polychaetes	4	1-5	2
+talitrid amphipod	amphipod	64	50-100	6
+talitrid amphipod	beach	23	5-50	4.523561956057013
+talitrid amphipod	beetle	1	1-5	0
+talitrid amphipod	fauna	2	1-5	1
+talitrid amphipod	intertidal	5	1-5	2.321928094887362
+talitrid amphipod	litter	3	1-5	1.584962500721156
+talitrid amphipod	littoral	2	1-5	1
+talitrid amphipod	microplastic	2	1-5	1
+talitrid amphipod	morphodynamic	1	1-5	0
+talitrid amphipod	plastic	1	1-5	0
+turtle	amphipod	4	1-5	2
+turtle	beach	265	100-500	8.049848549450562
+turtle	beetle	7	5-50	2.807354922057604
+turtle	clam	4	1-5	2
+turtle	dune	13	5-50	3.700439718141092
+turtle	fauna	72	50-100	6.169925001442312
+turtle	ghost crab	1	1-5	0
+turtle	intertidal	2	1-5	1
+turtle	litter	26	5-50	4.700439718141092
+turtle	littoral	11	5-50	3.4594316186372973
+turtle	macrolitter	2	1-5	1
+turtle	macroplastic	5	1-5	2.321928094887362
+turtle	microplastic	14	5-50	3.807354922057604
+turtle	plastic	103	100-500	6.6865005271832185
+turtle	polychaetes	3	1-5	1.584962500721156
+turtle	shorebird	1	1-5	0
+turtle	sublittoral	1	1-5	0
+turtle nest	beach	24	5-50	4.584962500721156
+turtle nest	beetle	3	1-5	1.584962500721156
+turtle nest	dune	5	1-5	2.321928094887362
+turtle nest	ghost crab	1	1-5	0
+turtle nest	turtle	43	5-50	5.426264754702098
