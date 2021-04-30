@@ -28,10 +28,11 @@ suppressPackageStartupMessages({
 ## file loading. Plotting takes two arguments,
 ## 1) file name
 ## 2) prefix for the plots names
+## 3) user keywords file
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/total_data.tsv","beach_litter")
+args <- c("../data/total_data.tsv","beach_litter", "../keywords.txt")
 # END remove!
 user_prefix <- args[2]
 
@@ -40,7 +41,10 @@ trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 colnames(trends_pubmed) <- c("year","PMID","synonym")
 
 categories_colors <- tibble(category=c("litter","fauna","morphology"),color=c("#5e3c99","#e66101","#fdb863"))
-trends_categories <- read_delim("../keywords.txt", delim="\t", col_names=F,col_types = cols()) %>% arrange(X3)
+
+# load the user keywords file that has 3 columns, synonyms, keywords, categories
+#
+trends_categories <- read_delim(args[3], delim="\t", col_names=F,col_types = cols()) %>% arrange(X3)
 colnames(trends_categories) <- c("synonym","keyword","category")
 
 ## filter only the keywords that are listed in the trends_categories and then join them to keep the general categories. Also remove the the synonyms to keep only the unique number of PMIDs per keyword.

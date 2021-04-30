@@ -82,6 +82,6 @@ echo "D|G analysis file created! Execution time was $time_exec seconds"
 echo "Plotting results..."
 
 ########################### CALLING R SCRIPT #####################################
-Rscript "trends_plots.r" "$output" "$user_prefix"
+Rscript "trends_plots.r" "$output" "$user_prefix" "$user_keywords"
 
 echo "Finished!"
