@@ -70,6 +70,7 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_ke
 ## trends per year
 keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts)) %>% ungroup() %>% mutate(keyword=factor(keyword,levels=rev(unique(trends_categories$keyword)))) %>% mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
 
+
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
 pubmed_keyword_per_year <- ggplot()+
@@ -94,6 +95,8 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_ke
 
 ############################## timeline heatmap #########################
 
+
+######
 pubmed_keyword_per_year_heatmap <- ggplot()+
     geom_tile(data=keywords_per_year, aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
     scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
@@ -107,6 +110,22 @@ pubmed_keyword_per_year_heatmap <- ggplot()+
     theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), legend.position="right",legend.direction="vertical",legend.key.height=unit(0.8,"cm"),legend.key.width = unit(0.2,"cm"),plot.margin=margin(0,0,0,0,"cm"))
    
 ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap.png"), plot =pubmed_keyword_per_year_heatmap , width = 30, height = 12, units='cm',device = "png", dpi = 300)
+
+##### with facet of categories
+key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
+    geom_tile(aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
+    scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
+    scale_y_discrete(expand=c(0,0))+
+    scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
+    ylab("")+
+    xlab("")+
+#    coord_equal()+
+    theme_bw()+
+    guides(fill=guide_legend(title="# of abstracts"))+
+    theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), legend.position="right",legend.direction="vertical",legend.key.height=unit(0.8,"cm"),legend.key.width = unit(0.2,"cm"),plot.margin=margin(0,0,0,0,"cm"),strip.text.y = element_text(angle =0,size=7.5),strip.background = element_rect(colour = "white", fill = "white") ,aspect.ratio = 1) +
+    facet_grid(rows = vars(category),space = "free",scales = "free_y",labeller = labeller(category = label_wrap_gen(9)))
+   
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.png"), plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "png", dpi = 300)
 
 
 #################################### Co-occerrence of keywords #####################################
@@ -219,21 +238,17 @@ limits=c(min(breaks),max(breaks))
 # running the plot
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,aes(x=to, y=from,fill=count_bin),alpha=1, show.legend = T)+
-  geom_tile(data=keywords,aes(x=to, y=from),alpha=0.2, show.legend = F)+
-#  geom_point(data=keywords_heatmap_long,aes(x=to, y=from,colour = count, size=count))  +
-#  scale_size(name="co-occurrence",range = c(0.5, 10),breaks=breaks,limits=limits)+
+  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
   scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
-#  scale_color_manual(values=c("gray80"))+
-#  geom_point(data=diagonal,aes(x=to, y=from),colour="lightyellow4",size=1,show.legend = F)+
+  scale_color_manual(values=c("gray80"))+
   scale_x_discrete(position = "top")+
-  guides(fill = guide_legend("# of abstracts"))+
-  ggtitle("Heatmap of co-occurrence of keywords")+
+  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
   xlab("") +
   ylab("")+
   theme_bw()+
-  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, device = "png", dpi = 150)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 #write_delim(keywords_heatmap_long,"heatmap_data.txt", delim="\t")
 
