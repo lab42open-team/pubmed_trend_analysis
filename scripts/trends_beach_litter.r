@@ -32,7 +32,7 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/total_data.tsv","beach_litter", "../keywords.txt")
+args <- c("../data/revision_data.tsv","beach_litter", "../revision_keys.txt")
 # END remove!
 user_prefix <- args[2]
 
@@ -234,6 +234,21 @@ limits=c(min(breaks),max(breaks))
 
 #keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, levels=keywords$from)
 #keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, levels=keywords$from)
+
+# running the plot
+pubmed_keyword_coocurrence_heatmap <- ggplot()+
+  geom_tile(data=keywords_heatmap_long,aes(x=to, y=from,fill=count_bin),alpha=1, show.legend = T)+
+  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
+  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
+  scale_color_manual(values=c("gray80"))+
+  scale_x_discrete(position = "top")+
+  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
+  xlab("") +
+  ylab("")+
+  theme_bw()+
+  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 # running the plot
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
