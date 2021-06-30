@@ -14,7 +14,6 @@
 #
 # Change the n_papers_pubmed when pubmed is refreshed in order to estimate the random chance of keyword occurrance.
 #
-#
 # Packages
 
 suppressPackageStartupMessages({
