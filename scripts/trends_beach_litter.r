@@ -63,7 +63,7 @@ pubmed_keyword_frequency <- ggplot()+
     theme_bw()+
     theme(legend.position=c(0.85,0.85),axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.png"), plot = pubmed_keyword_frequency, device = "png", dpi = 300)
+ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.tiff"), plot = pubmed_keyword_frequency, device = "tiff",dpi = 300)
 
 
 ## trends per year
@@ -118,13 +118,24 @@ key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
     scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
     ylab("")+
     xlab("")+
-#    coord_equal()+
     theme_bw()+
     guides(fill=guide_legend(title="# of abstracts"))+
-    theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(), legend.position="right",legend.direction="vertical",legend.key.height=unit(0.8,"cm"),legend.key.width = unit(0.2,"cm"),plot.margin=margin(0,0,0,0,"cm"),strip.text.y = element_text(angle =0,size=7.5),strip.background = element_rect(colour = "white", fill = "white") ,aspect.ratio = 1) +
+    theme(plot.background=element_blank(),
+          panel.border=element_blank(), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor=element_blank(), 
+          legend.position="right",legend.direction="vertical",
+          legend.key.height=unit(0.8,"cm"),
+          legend.key.width = unit(0.2,"cm"),
+          plot.margin=margin(0.1,0.2,0.2,0.2,"cm"),
+          axis.text=element_text(size=10),
+          strip.text.y = element_text(angle =0,size=9),
+          strip.background = element_rect(colour = "white", fill = "white") ,
+          aspect.ratio = 1) +
     facet_grid(rows = vars(category),space = "free",scales = "free_y",labeller = labeller(category = label_wrap_gen(9)))
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.png"), plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "png", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.tiff"), 
+       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "tiff", dpi = 300)
 
 
 #################################### Co-occerrence of keywords #####################################
@@ -201,13 +212,27 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
         scale_edge_color_continuous(low="#bdbdbd", high="#636363")+
         geom_node_text(aes(color=category,label = name),fontface = "bold" , nudge_y = 0.1, check_overlap = TRUE, show.legend=FALSE)+
         scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
+        scale_size(range = c(0.5,6), breaks=c(5,15,25))+
         scale_edge_width(range = c(0.1,2))+
-        guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), shape=guide_legend("Compound",order = 1),color=guide_legend("Compound",order = 1), size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
+        guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),
+               edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), 
+               shape=guide_legend("Compound",order = 1),
+               color=guide_legend("Compound",order = 1), 
+               color = guide_legend(override.aes = list(size = 16)),
+               size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
         theme_graph()+
         coord_cartesian(clip = "off")+
-        theme(legend.justification = "top",legend.margin=margin(unit(0.2,"cm")),legend.position = "right",legend.title = element_text(size = 15), legend.text = element_text(size = 14))
+        theme(legend.justification = "top",
+              legend.box="horizontal",
+              legend.direction= "vertical",
+              legend.margin=margin(unit(0.4,"cm")),
+              legend.position = "bottom",
+              legend.spacing.x=unit(1.5,"cm"),
+              legend.title = element_text(size = 15),
+              legend.text = element_text(size = 14),
+              legend.key.size = unit(0.8,"cm"))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.tiff"), plot = p, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
 
 ######################################### Heatmap plotting ###########################################
 
@@ -262,7 +287,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   theme_bw()+
   theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.tiff"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
 
 #write_delim(keywords_heatmap_long,"heatmap_data.txt", delim="\t")
 
