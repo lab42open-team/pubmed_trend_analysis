@@ -155,45 +155,6 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_ke
 
 #################################### Co-occerrence of keywords #####################################
 # create the edglist of keywords and PMID's
-#papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup()
-
-#n_papers_pubmed <- 32304541 # number of unique papers in PubMed. Must be updated when PubMed will be refreshed!!!!!!!
-
-#keywords_n_papers <- papers_keywords_network %>% group_by(keyword) %>% summarise(n_papers=n()) %>% mutate(freq=n_papers/n_papers_pubmed) 
-
-
-# create a matrix class spMatrix (handles better sparse matrices) to do inverse table multiplication
-#papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),ncol=length(unique(papers_keywords_network$keyword)),i=as.numeric(factor(papers_keywords_network$PMID)),j=as.numeric(factor(papers_keywords_network$keyword)),x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
-
-#row.names(papers_keywords_matrix) <- levels(factor(papers_keywords_network$PMID))
-#colnames(papers_keywords_matrix) <- levels(factor(papers_keywords_network$keyword))
-
-
-# with the inverse cross product we do the projection of the edgelist to keywords in order to calculate how many times keyword pairs appear together in abstracts.
-#keywords_heatmap <- tcrossprod(t(papers_keywords_matrix))
-
-# becaue the matrix is summetric we keep the triangle
-#keywords_heatmap[upper.tri(keywords_heatmap)] <- 0
-
-#keywords_heatmap <- as.data.frame(as.matrix(keywords_heatmap))
-#write_delim(keywords_heatmap,"keywords_heatmap.tsv",delim="\t")
-
-# transform to long format for plotting and remove zero's and NA's and assign -1 to loops (self occurrence)
-#keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) %>% filter(count!=0,colname!=rowname) %>% na.omit() 
-#colnames(keywords_heatmap_long) <- c("from","to","count")
-
-#edge_weight_summary <- summary(keywords_heatmap_long$count)
-
-# count bins custom for each case. Here the following seem most appropriate
-#keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,50, 100, 500, 800, 1000),labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
-
-# assign the order levels of the count_bin
-#keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),levels=rev(levels(keywords_heatmap_long$count_bin)))
-
-### test for all 
-###
-
-# create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup() %>% left_join(trends_categories_only, by=c("keyword"="keyword"))
 
 # very important for the correct order of the keywords based on categories.
