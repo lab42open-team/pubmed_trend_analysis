@@ -320,6 +320,7 @@ limits=c(min(breaks),max(breaks))
 #ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 #
 ## running the plot
+keywords_heatmap_long <- keywords_heatmap_long %>% filter(!is.na(count_bin))
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
   geom_tile(data=keywords,aes(x=to, y=from),fill="white",alpha=1, show.legend = F)+
@@ -342,7 +343,6 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.tiff"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
 
-#write_delim(keywords_heatmap_long,"heatmap_data.txt", delim="\t")
 
 ####################################### correlation heatmap ###################################################
 
