@@ -68,8 +68,22 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_ke
 
 
 ## trends per year
-keywords_per_year <- trends_pubmed %>% distinct(PMID, keyword,category,year) %>% group_by(year, keyword,category) %>% summarize(counts=n()) %>% ungroup() %>% arrange(year) %>% group_by(keyword,category) %>% mutate(cumulative_counts=cumsum(counts)) %>% ungroup() %>% mutate(keyword=factor(keyword,levels=rev(unique(trends_categories$keyword)))) %>% mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
+keywords_per_year <- trends_pubmed %>% 
+    distinct(PMID, keyword,category,year) %>% 
+    group_by(year, keyword,category) %>% 
+    summarize(counts=n()) %>% 
+    ungroup() %>% 
+    arrange(year) %>% 
+    group_by(keyword,category) %>% 
+    mutate(cumulative_counts=cumsum(counts)) %>% 
+    ungroup() %>% 
+    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
+    mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),
+                         labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
 
+
+# change the order to descreasing to appear with alphabetical order
+keywords_per_year$keyword <- factor(keywords_per_year$keyword, levels=unique(keywords_per_year$keyword[order(keywords_per_year$category,keywords_per_year$keyword, decreasing=T)]))
 
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
@@ -115,7 +129,7 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_ke
 key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
     geom_tile(aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
     scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
-    scale_y_discrete(expand=c(0,0))+
+#    scale_y_discrete(expand=c(0,0),limits = rev(levels(keywords_per_year$keyword)))+
     scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
     ylab("")+
     xlab("")+
@@ -182,60 +196,53 @@ ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_ke
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed %>% group_by(PMID, keyword) %>% distinct(PMID, keyword) %>% ungroup() %>% left_join(trends_categories_only, by=c("keyword"="keyword"))
 
+# very important for the correct order of the keywords based on categories.
 papers_keywords_network$keyword <- factor(papers_keywords_network$keyword, levels=unique(papers_keywords_network$keyword[order(papers_keywords_network$category, papers_keywords_network$keyword)]))
 
 n_papers_pubmed <- 32304541 # number of unique papers in PubMed. Must be updated when PubMed will be refreshed!!!!!!!
 
 keywords_n_papers <- papers_keywords_network %>% group_by(keyword) %>% summarise(n_papers=n()) %>% mutate(freq=n_papers/n_papers_pubmed)
 
+# create a matrix class spMatrix (handles better sparse matrices) to do inverse table multiplication
+papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),
+                                   ncol=length(unique(papers_keywords_network$keyword)),
+                                   i=as.numeric(factor(papers_keywords_network$PMID)),
+                                   j=as.numeric(papers_keywords_network$keyword),
+                                   x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
 
-papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),ncol=length(unique(papers_keywords_network$keyword)),i=as.numeric(factor(papers_keywords_network$PMID)),j=as.numeric(papers_keywords_network$keyword),x = rep(1, length(as.numeric(papers_keywords_network$PMID))))
-
+# assign the row and col names. Note that papers_keywords_network$keyword is already a factor
 row.names(papers_keywords_matrix) <- levels(factor(papers_keywords_network$PMID))
 colnames(papers_keywords_matrix) <- levels(papers_keywords_network$keyword)
 
+# with the inverse cross product we do the projection of the edgelist to keywords in order to 
+# calculate how many times keyword pairs appear together in abstracts.
 keywords_heatmap <- as.data.frame(as.matrix(crossprod(papers_keywords_matrix)))
 keywords_heatmap[lower.tri(keywords_heatmap)] <- 0
-keywords_heatmap_long <- keywords_heatmap %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" )
+keywords_heatmap_long <- keywords_heatmap %>% 
+    rownames_to_column() %>% 
+    pivot_longer(-rowname,names_to="colname",values_to="count" )
 
 colnames(keywords_heatmap_long) <- c("from","to","count")
-keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, breaks=c(0,5,50, 100, 500, 800, 1000),labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
+
+# count bins custom for each case. Here the following seem most appropriate
+keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, 
+                                       breaks=c(0,5,50, 100, 500, 800, 1000),
+                                       labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
 
 # assign the order levels of the count_bin
-keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),levels=rev(levels(keywords_heatmap_long$count_bin)))
-
+keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),
+                                          levels=rev(levels(keywords_heatmap_long$count_bin)))
 
 ## add the categories for the keywords
-keywords_heatmap_long <- keywords_heatmap_long %>% left_join(trends_categories_only, by=c("from"="keyword")) %>% left_join(trends_categories_only, by=c("to"="keyword"))
+keywords_heatmap_long <- keywords_heatmap_long %>% 
+    left_join(trends_categories_only, by=c("from"="keyword")) %>% 
+    left_join(trends_categories_only, by=c("to"="keyword"))
 
-keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x, keywords_heatmap_long$from)]))
-keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y, keywords_heatmap_long$to)]))
-
-write_delim(keywords_heatmap_long,"keywords_heatmap_long_order.tsv" ,delim="\t")
-#keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, levels=keywords$from)
-#keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, levels=keywords$from)
-
-#keywords_heatmap_lower <- keywords_heatmap
-#keywords_heatmap_lower[lower.tri(keywords_heatmap_lower)] <- 0
-#keywords_heatmap_long_lower <- keywords_heatmap_lower  %>% rownames_to_column() %>% pivot_longer(-rowname,names_to="colname",values_to="count" ) %>% filter(count==0)
-
-# running the plot
-pubmed_keyword_coocurrence_heatmap <- ggplot()+
-  geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
-#  geom_tile(data=keywords_heatmap_long_lower,aes(x=rowname, y=colname,color=as.character(count)),alpha=1, show.legend = T)+
-#  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
-  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
-  scale_color_manual(values=c("gray80"))+
-  scale_x_discrete(position = "top")+
-  scale_y_discrete(limits = rev(levels(keywords_heatmap_long$to)))+
-  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
-  xlab("") +
-  ylab("")+
-  theme_bw()+
-  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
-
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test1.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
-
+# add the order based on the categories so they appear in that order
+keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, 
+                                     levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x, keywords_heatmap_long$from)]))
+keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, 
+                                   levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y, keywords_heatmap_long$to)]))
 
 
 ######################################### Network analysis ###########################################
@@ -279,7 +286,8 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
                edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), 
                shape=guide_legend("Compound",order = 1),
                color=guide_legend("Compound",order = 1), 
-               size=guide_legend("Keywords co-occurrences\n(degree)",order = 2,override.aes = list(color="gray50")))+
+               size=guide_legend("Keywords co-occurrences\n(degree)",
+                                 order = 2,override.aes = list(color="gray50")))+
         theme_graph()+
         coord_cartesian(clip = "off")+
         theme(legend.justification = "top",
@@ -316,8 +324,23 @@ breaks <- c(floor(summary$minimum),round(quantile[1]),round(quantile[2]),round(q
 
 limits=c(min(breaks),max(breaks))
 
-#keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, levels=keywords$from)
-#keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, levels=keywords$from)
+# running the plot
+pubmed_keyword_coocurrence_heatmap <- ggplot()+
+  geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
+#  geom_tile(data=keywords_heatmap_long_lower,aes(x=rowname, y=colname,color=as.character(count)),alpha=1, show.legend = T)+
+#  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
+  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
+  scale_color_manual(values=c("gray80"))+
+  scale_x_discrete(position = "top")+
+  scale_y_discrete(limits = rev(levels(keywords_heatmap_long$to)))+
+  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
+  xlab("") +
+  ylab("")+
+  theme_bw()+
+  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test1.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+
 
 # running the plot
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
