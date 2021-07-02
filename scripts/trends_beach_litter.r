@@ -179,6 +179,7 @@ colnames(papers_keywords_matrix) <- levels(papers_keywords_network$keyword)
 # calculate how many times keyword pairs appear together in abstracts.
 keywords_heatmap <- as.data.frame(as.matrix(crossprod(papers_keywords_matrix)))
 keywords_heatmap[lower.tri(keywords_heatmap)] <- 0
+
 keywords_heatmap_long <- keywords_heatmap %>% 
     rownames_to_column() %>% 
     pivot_longer(-rowname,names_to="colname",values_to="count" )
@@ -205,13 +206,13 @@ keywords_heatmap_long$from <- factor(keywords_heatmap_long$from,
 keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, 
                                    levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y, keywords_heatmap_long$to)]))
 
-
 ######################################### Network analysis ###########################################
 
 #coword_graph <- graph_from_adjacency_matrix(as.matrix(keywords_heatmap),weighted=T, mode="undirected")
 colnames(trends_counts) <- c("name","category","abstracts" )
 
-coword_graph <- graph_from_data_frame(keywords_heatmap_long, directed=FALSE, vertices=trends_counts)
+keywords_heatmap_long_net <- keywords_heatmap_long %>% filter(count!=0, from!=to)
+coword_graph <- graph_from_data_frame(keywords_heatmap_long_net, directed=FALSE, vertices=trends_counts)
 
 V(coword_graph)$color <- V(coword_graph)$category
 ### Centralities calculation
@@ -285,12 +286,45 @@ breaks <- c(floor(summary$minimum),round(quantile[1]),round(quantile[2]),round(q
 
 limits=c(min(breaks),max(breaks))
 
+## running the plot
+##pubmed_keyword_coocurrence_heatmap <- ggplot()+
+#  geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
+##  geom_tile(data=keywords_heatmap_long_lower,aes(x=rowname, y=colname,color=as.character(count)),alpha=1, show.legend = T)+
+##  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
+#  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
+#  scale_color_manual(values=c("gray80"))+
+#  scale_x_discrete(position = "top")+
+#  scale_y_discrete(limits = rev(levels(keywords_heatmap_long$to)))+
+#  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
+#  xlab("") +
+#  ylab("")+
+#  theme_bw()+
+#  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+#
+#ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test1.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+#
+#
 # running the plot
+#pubmed_keyword_coocurrence_heatmap <- ggplot()+
+#  geom_tile(data=keywords_heatmap_long,aes(x=to, y=from,fill=count_bin),alpha=1, show.legend = T)+
+#  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
+#  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
+#  scale_color_manual(values=c("gray80"))+
+#  scale_x_discrete(position = "top")+
+#  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
+#  xlab("") +
+#  ylab("")+
+#  theme_bw()+
+#  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+#
+#ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
+#
+## running the plot
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
-#  geom_tile(data=keywords_heatmap_long_lower,aes(x=rowname, y=colname,color=as.character(count)),alpha=1, show.legend = T)+
-#  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
-  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
+  geom_tile(data=keywords,aes(x=to, y=from),fill="white",alpha=1, show.legend = F)+
+  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
+  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8","white")) + #,breaks=breaks,limits=limits) +
   scale_color_manual(values=c("gray80"))+
   scale_x_discrete(position = "top")+
   scale_y_discrete(limits = rev(levels(keywords_heatmap_long$to)))+
@@ -298,38 +332,13 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
   xlab("") +
   ylab("")+
   theme_bw()+
-  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
-
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test1.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
-
-
-# running the plot
-pubmed_keyword_coocurrence_heatmap <- ggplot()+
-  geom_tile(data=keywords_heatmap_long,aes(x=to, y=from,fill=count_bin),alpha=1, show.legend = T)+
-  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
-  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
-  scale_color_manual(values=c("gray80"))+
-  scale_x_discrete(position = "top")+
-  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
-  xlab("") +
-  ylab("")+
-  theme_bw()+
-  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
-
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap_test.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
-
-# running the plot
-pubmed_keyword_coocurrence_heatmap <- ggplot()+
-  geom_tile(data=keywords_heatmap_long,aes(x=to, y=from,fill=count_bin),alpha=1, show.legend = T)+
-  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
-  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8")) + #,breaks=breaks,limits=limits) +
-  scale_color_manual(values=c("gray80"))+
-  scale_x_discrete(position = "top")+
-  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
-  xlab("") +
-  ylab("")+
-  theme_bw()+
-  theme(plot.background=element_blank(),panel.border=element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),text = element_text(size=17), axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+  theme(plot.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor=element_blank(),
+        text = element_text(size=17), 
+        axis.text.x = element_text(angle = 90, hjust = 0),
+        legend.position = c(.90, .83))
 
 ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.tiff"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
 
