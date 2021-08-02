@@ -31,7 +31,7 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/gut_all_data.txt","gut_proteome", "../gut_proteome_keys.txt")
+args <- c("../data/gut_prot_med_data_2021-08-01.txt","gut_proteome", "../gut_prot_med.txt")
 # END remove!
 user_prefix <- args[2]
 
@@ -62,7 +62,7 @@ pubmed_keyword_frequency <- ggplot()+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.tiff"), plot = pubmed_keyword_frequency, device = "tiff",dpi = 300)
+ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.png"), plot = pubmed_keyword_frequency, device = "png",dpi = 300)
 
 
 ## trends per year
@@ -147,8 +147,8 @@ key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
           aspect.ratio = 1) +
     facet_grid(rows = vars(category),space = "free",scales = "free_y",labeller = labeller(category = label_wrap_gen(9)))
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.tiff"), 
-       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "tiff", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.png"), 
+       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "png", dpi = 300)
 
 
 #################################### Co-occerrence of keywords #####################################
@@ -260,7 +260,7 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
               legend.text = element_text(size = 14),
               legend.key.size = unit(0.8,"cm"))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.tiff"), plot = p, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 ######################################### Heatmap plotting ###########################################
 
@@ -339,7 +339,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
         axis.text.x = element_text(angle = 90, hjust = 0),
         legend.position = c(.90, .83))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.tiff"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 
 ####################################### correlation heatmap ###################################################
