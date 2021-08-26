@@ -31,7 +31,7 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/revision_data.tsv","beach_litter", "../revision_keys.txt")
+args <- c("../data/revision_data.tsv","beach_litter", "../beach_litter_2.txt")
 # END remove!
 user_prefix <- args[2]
 
@@ -77,14 +77,18 @@ keywords_per_year <- trends_pubmed %>%
     group_by(keyword,category) %>% 
     mutate(cumulative_counts=cumsum(counts)) %>% 
     ungroup() %>% 
-    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
+    arrange(year,keyword,category) %>%
+#    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
     mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),
-                         labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<")))
+                         labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<"))) %>%
+    ungroup()
+
+
 
 
 # change the order to descreasing to appear with alphabetical order
-keywords_per_year$keyword <- factor(keywords_per_year$keyword, levels=unique(keywords_per_year$keyword[order(keywords_per_year$category,keywords_per_year$keyword, decreasing=T)]))
-
+keywords_per_year$keyword <- factor(keywords_per_year$keyword, levels=unique(keywords_per_year$keyword[order(keywords_per_year$keyword,decreasing=T)]))
+#levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x, keywords_heatmap_long$from)])
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
 pubmed_keyword_per_year <- ggplot()+
@@ -270,7 +274,7 @@ ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_n
 
 # we defined here the diagonal because the raw values don't include them. In addition we need the diagonal seperate from the raw data because we will paint it differently
 
-keywords <- trends_categories %>% filter( keyword %in% unique(c(keywords_heatmap_long$from,keywords_heatmap_long$to))) %>% mutate(from=factor(keyword,levels=as.character(unique(keyword)))) %>% mutate(to=factor(keyword,levels=as.character(unique(unique(keyword)))),count=0,count_bin="0",jaccard=0) %>% dplyr::select(from,to,count,count_bin)
+keywords <- trends_categories %>% mutate(from=factor(keyword,levels=as.character(unique(keyword)))) %>% mutate(to=factor(keyword,levels=as.character(unique(unique(keyword)))),count=0,count_bin="0",jaccard=0) %>% dplyr::select(from,to,count,count_bin)
 
 diagonal <- tibble(from=factor(keywords, levels=as.character(unique(trends_categories$keyword))),to=factor(keywords, levels=as.character(unique(trends_categories$keyword))),count=-1,jaccard=0) 
 ## summaries to dynamically set the break points and limits of the plot
@@ -323,8 +327,8 @@ limits=c(min(breaks),max(breaks))
 keywords_heatmap_long <- keywords_heatmap_long %>% filter(!is.na(count_bin))
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
-  geom_tile(data=keywords,aes(x=to, y=from),fill="white",alpha=1, show.legend = F)+
-  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
+  geom_tile(data=keywords_heatmap_long,aes(x=from, y=from),fill="white",alpha=1, show.legend = F)+
+  geom_point(data=keywords_heatmap_long,aes(x=from, y=from, color="gray50"),alpha=1, show.legend = F)+
   scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8","white")) + #,breaks=breaks,limits=limits) +
   scale_color_manual(values=c("gray80"))+
   scale_x_discrete(position = "top")+
