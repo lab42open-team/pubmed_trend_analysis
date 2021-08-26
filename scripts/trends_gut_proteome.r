@@ -8,7 +8,7 @@
 #           Institute of Marine Biology Biotechnology and Aquaculture (IMBBC)
 #           Hellenic Centre for Marine Research (HCMR)
 #
-# Created:  05/06/2020
+# Created:  01/08/2021
 # License:  GNU GPLv3 license
 # Developer : Savvas Paragkamian
 #
@@ -31,15 +31,13 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/revision_data.tsv","beach_litter", "../beach_litter_2.txt")
+args <- c("../data/gut_prot_med_data_2021-08-01.txt","gut_proteome", "../gut_prot_med.txt")
 # END remove!
 user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
 colnames(trends_pubmed) <- c("year","PMID","synonym")
-
-categories_colors <- tibble(category=c("litter","fauna","morphology"),color=c("#5e3c99","#e66101","#fdb863"))
 
 # load the user keywords file that has 3 columns, synonyms, keywords, categories
 #
@@ -59,12 +57,12 @@ pubmed_keyword_frequency <- ggplot()+
     geom_col(data=trends_counts,aes(x=keyword,y=counts, fill=category),width=0.8)+
     geom_text(data=trends_counts, aes(x=keyword,y=counts,label=counts), vjust=-0.4, color="grey70", size=2)+
     scale_y_continuous(name="# of abstracts",limits=c(0,max(trends_counts$counts)),n.breaks=10)+
-    scale_fill_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
+    scale_fill_manual(values=c("gut microbiome"="#e66101","flux"="#5e3c99","proteomics"="#bababa","medical"="#fdb863"))+
     guides(fill=guide_legend(title="Compound"))+
     theme_bw()+
-    theme(legend.position=c(0.85,0.85),axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),panel.grid.major.x = element_blank() ,panel.grid.minor=element_blank())
 
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.tiff"), plot = pubmed_keyword_frequency, device = "tiff",dpi = 300)
+ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_key_freq.png"), plot = pubmed_keyword_frequency, device = "png",dpi = 300)
 
 
 ## trends per year
@@ -77,23 +75,19 @@ keywords_per_year <- trends_pubmed %>%
     group_by(keyword,category) %>% 
     mutate(cumulative_counts=cumsum(counts)) %>% 
     ungroup() %>% 
-    arrange(year,keyword,category) %>%
-#    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
-    mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 1000, max(counts,na.rm=T)),
-                         labels=c("1-10","10-50", "50-100", "100-500","500-1000","1000<"))) %>%
-    ungroup()
-
-
+    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
+    mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 2000, max(counts,na.rm=T)),
+                         labels=c("1-10","10-50", "50-100", "100-500","500-2000","2000<")))
 
 
 # change the order to descreasing to appear with alphabetical order
-keywords_per_year$keyword <- factor(keywords_per_year$keyword, levels=unique(keywords_per_year$keyword[order(keywords_per_year$keyword,decreasing=T)]))
-#levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x, keywords_heatmap_long$from)])
+keywords_per_year$keyword <- factor(keywords_per_year$keyword, levels=unique(keywords_per_year$keyword[order(keywords_per_year$category,keywords_per_year$keyword, decreasing=T)]))
+
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
 pubmed_keyword_per_year <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=counts, color=keyword), show.legend=T)+
-    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
+    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2021))+
     scale_y_discrete(expand=c(0,0))+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
@@ -103,7 +97,7 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_ke
 # cumulative records of keywords in abstracts over the years
 pubmed_keyword_per_year_cumulative <- ggplot()+
     geom_line(data=keywords_per_year, aes(x=year,y=cumulative_counts, color=keyword), show.legend=T)+
-    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),limits=c(min(keywords_per_year$year,na.rm=T),2020))+
+    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2021,10),limits=c(min(keywords_per_year$year,na.rm=T),2021))+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
@@ -153,8 +147,8 @@ key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
           aspect.ratio = 1) +
     facet_grid(rows = vars(category),space = "free",scales = "free_y",labeller = labeller(category = label_wrap_gen(9)))
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.tiff"), 
-       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "tiff", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.png"), 
+       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "png", dpi = 300)
 
 
 #################################### Co-occerrence of keywords #####################################
@@ -245,7 +239,7 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
         geom_node_point(aes(size=Degree, shape=category, color=category))+
         scale_edge_color_continuous(low="#bdbdbd", high="#636363")+
         geom_node_text(aes(color=category,label = name),fontface = "bold" , nudge_y = 0.1, check_overlap = TRUE, show.legend=FALSE)+
-        scale_color_manual(values=c("fauna"="#e66101","litter"="#5e3c99","morphodynamic state"="#bababa","Littoral Active Zone"="#fdb863"))+
+        scale_color_manual(values=c("gut microbiome"="#e66101","flux"="#5e3c99","proteomics"="#bababa","medical"="#fdb863"))+
         scale_size(range = c(0.5,6), breaks=c(5,15,25))+
         scale_edge_width(range = c(0.1,2))+
         guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),
@@ -266,7 +260,7 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
               legend.text = element_text(size = 14),
               legend.key.size = unit(0.8,"cm"))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.tiff"), plot = p, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_net.png"), plot = p, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 ######################################### Heatmap plotting ###########################################
 
@@ -274,7 +268,7 @@ ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_n
 
 # we defined here the diagonal because the raw values don't include them. In addition we need the diagonal seperate from the raw data because we will paint it differently
 
-keywords <- trends_categories %>% mutate(from=factor(keyword,levels=as.character(unique(keyword)))) %>% mutate(to=factor(keyword,levels=as.character(unique(unique(keyword)))),count=0,count_bin="0",jaccard=0) %>% dplyr::select(from,to,count,count_bin)
+keywords <- trends_categories %>% filter( keyword %in% unique(c(keywords_heatmap_long$from,keywords_heatmap_long$to))) %>% mutate(from=factor(keyword,levels=as.character(unique(keyword)))) %>% mutate(to=factor(keyword,levels=as.character(unique(unique(keyword)))),count=0,count_bin="0",jaccard=0) %>% dplyr::select(from,to,count,count_bin)
 
 diagonal <- tibble(from=factor(keywords, levels=as.character(unique(trends_categories$keyword))),to=factor(keywords, levels=as.character(unique(trends_categories$keyword))),count=-1,jaccard=0) 
 ## summaries to dynamically set the break points and limits of the plot
@@ -327,8 +321,8 @@ limits=c(min(breaks),max(breaks))
 keywords_heatmap_long <- keywords_heatmap_long %>% filter(!is.na(count_bin))
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,aes(x=from, y=to,fill=count_bin),alpha=1, show.legend = T)+
-  geom_tile(data=keywords_heatmap_long,aes(x=from, y=from),fill="white",alpha=1, show.legend = F)+
-  geom_point(data=keywords_heatmap_long,aes(x=from, y=from, color="gray50"),alpha=1, show.legend = F)+
+  geom_tile(data=keywords,aes(x=to, y=from),fill="white",alpha=1, show.legend = F)+
+  geom_point(data=keywords,aes(x=to, y=from, color=count_bin),alpha=1, show.legend = F)+
   scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8","white")) + #,breaks=breaks,limits=limits) +
   scale_color_manual(values=c("gray80"))+
   scale_x_discrete(position = "top")+
@@ -345,7 +339,7 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
         axis.text.x = element_text(angle = 90, hjust = 0),
         legend.position = c(.90, .83))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.tiff"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "tiff", dpi = 300)
+ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y%m%d%H%M"),"_heatmap.png"), plot = pubmed_keyword_coocurrence_heatmap, width = 25, height = 25, units='cm' , device = "png", dpi = 300)
 
 
 ####################################### correlation heatmap ###################################################
