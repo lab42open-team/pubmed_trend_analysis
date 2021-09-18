@@ -31,7 +31,7 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly=TRUE)
 # remove!
-args <- c("../data/revision_data.tsv","beach_litter", "../beach_litter_2.txt")
+args <- c("../data/beach_macroplastic_litter_2021-06-22.tsv","beach_litter", "../beach_macroplastic_litter_2021-06-22_keys.txt")
 # END remove!
 user_prefix <- args[2]
 
