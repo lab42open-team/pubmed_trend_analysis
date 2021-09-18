@@ -17,37 +17,46 @@ The output of the ftp method are multiple xml files which then were transformed 
 
 ## Keywords
 
-A .txt file with the following keywords is read from the bash script
+A .txt file with the following keywords is read from the bash script. It has three columns
+
+ |keyword synonyms | keyword | compound |
+
+The first column has all the variable forms of the keyword of the second column.
+The third column contains the general categories / compounds that the keywords belong to.
+
+Here is an example:
 
 ```
-litter
-marine litter
-plastic
-macroplastic
-microplastic
-nanoplastic
-beach
-beach width
-beach slope
-beach exposure
-morphodynamic
-sand grain size
-sublittoral
-littoral
-littoral zone
-intertidal
-dune
-fauna
-talitrid apphipod
-donacid clam
-bird nest
-turtle nest
-turtle
-ghost crab
-polychaetes
-clam
-beetle
-talitrid
+amphipoda	amphipod	fauna
+amphipods	amphipod	fauna
+beach	beach	Littoral Active Zone
+beach exposure	beach exposure	morphodynamic state
+beach exposures	beach exposure	morphodynamic state
+beach slope	beach slope	morphodynamic state
+beach slopes	beach slope	morphodynamic state
+beach width	beach width	morphodynamic state
+beach widths	beach width	morphodynamic state
+beaches	beach	Littoral Active Zone
+beetle	beetle	fauna
+beetles	beetle	fauna
+bird nest	bird nest	fauna
+bird nests	bird nest	fauna
+clam	clam	fauna
+clams	clam	fauna
+donacid clams	clam	fauna
+dune	dune	Littoral Active Zone
+dunes	dune	Littoral Active Zone
+fauna	fauna	fauna
+ghost crab	ghost crab	fauna
+ghost crabs	ghost crab	fauna
+indicator fauna	indicator fauna	fauna
+intertidal	intertidal	Littoral Active Zone
+litter	litter	litter
+littoral	littoral	Littoral Active Zone
+littoral active zone	littoral active zone	Littoral Active Zone
+littoral active zones	littoral active zone	Littoral Active Zone
+littoral zone	littoral zone	Littoral Active Zone
+littoral zones	littoral zone	Littoral Active Zone
 ```
 
 ## Prerequisites
