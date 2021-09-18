@@ -1,5 +1,10 @@
 #!/usr/bin/Rscript
-
+# This script contains the analysis of the article :
+# Coupling beach ecology and macroplastics litter studies: Current trends and the way ahead
+# 
+# https://doi.org/10.1016/j.marpolbul.2021.112951
+#
+# Scope:
 # In this script we take the data from trends extraction from pubmed and transform them to create plots.
 # The data file contains 5 fields, the line of the original file, the id of the article - PMID, the keyword that was matched, the file that contains the keyword and the year of the publication.
 # Three types of plots are created, bar plot, yearly line plot and a heatmap of co-occurrances
