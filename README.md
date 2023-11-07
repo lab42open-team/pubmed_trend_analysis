@@ -61,7 +61,7 @@ littoral zones	littoral zone	Littoral Active Zone
 
 ## Prerequisites
 
-In bash the the search is done in awk patterm ```match``` command and results are written in a file after being checked for duplicates and missing information.
+In bash the search is done in awk patterm ```match``` command and results are written in a file after being checked for duplicates and missing information.
 
 For results file transformation, statistics and plotting we used R version 3.5.2 and the ``` tidyverse 1.3.0 ``` packages ``` readr, dplyr, ggplot2, tidyr```. For the network analysis the R packages ```Matrix```, ```igraph```,```tidygraph``` and ```gggraph``` are used.
 
