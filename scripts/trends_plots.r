@@ -92,18 +92,6 @@ ggsave(paste0("../plots/",
 
 
 ## trends per year
-keywords_per_year <- trends_pubmed %>% 
-    distinct(PMID, keyword,category,year) %>% 
-    group_by(year, keyword,category) %>% 
-    summarize(counts=n()) %>% 
-    ungroup() %>% 
-    arrange(year) %>% 
-    group_by(keyword,category) %>% 
-    mutate(cumulative_counts=cumsum(counts)) %>% 
-    ungroup() %>% 
-    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
-    mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 2000, max(counts,na.rm=T)),
-                         labels=c("1-10","10-50", "50-100", "100-500","500-2000","2000<")))
 
 keywords_per_year <- trends_pubmed |>
     distinct(PMID, keyword,category, year) |>
