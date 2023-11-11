@@ -176,7 +176,7 @@ pubmed_keyword_per_year_heatmap <- ggplot()+
     scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
     ylab("")+
     xlab("")+
-    coord_equal()+
+#    coord_equal()+
     theme_bw()+
     guides(fill=guide_legend(title="# of abstracts"))+
     theme(panel.border=element_blank(),
@@ -201,45 +201,42 @@ ggsave(paste0("../plots/",
        dpi = 300)
 
 ##### with facet of categories
-key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
-    geom_tile(aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
-    scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
-#    scale_y_discrete(expand=c(0,0),limits = rev(levels(keywords_per_year$keyword)))+
-    scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
-    ylab("")+
-    xlab("")+
-    theme_bw()+
-    guides(fill=guide_legend(title="# of abstracts"))+
-    theme(plot.background=element_blank(),
-          panel.border=element_blank(), 
-          panel.grid.major = element_blank(),
-          panel.grid.minor=element_blank(), 
-          legend.position="right",legend.direction="vertical",
-          legend.key.height=unit(0.8,"cm"),
-          legend.key.width = unit(0.2,"cm"),
-          plot.margin=margin(0.1,0.2,0.2,0.2,"cm"),
-          axis.text=element_text(size=10),
-          strip.text.y = element_text(angle =0,size=9),
-          strip.background = element_rect(colour = "white", fill = "white") ,
-          aspect.ratio = 1) +
-    facet_grid(rows = vars(category),space = "free",scales = "free_y",labeller = labeller(category = label_wrap_gen(9)))
+
+key_time_heatmap_facet <- pubmed_keyword_per_year_heatmap + 
+    facet_grid(rows = vars(category),
+               space = "free",
+               scales = "free_y",
+               labeller = labeller(category = label_wrap_gen(9)))
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.png"), 
-       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "png", dpi = 300)
+ggsave(paste0("../plots/",
+              user_prefix,"_",
+              format(Sys.time(), "%Y%m%d%H%M"),
+              "_key_time_heatmap_facet.png"), 
+       plot=key_time_heatmap_facet,
+       height=12,
+       width = 30,
+       units='cm',
+       device = "png",
+       dpi = 300)
 
-
+#################################### Co-occerrence of keywords #####################################
 
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed |>
     group_by(PMID, keyword) |> 
     distinct(PMID, keyword) |> 
-    ungroup()
+    ungroup() |>
+    left_join(trends_categories_only, by=c("keyword"="keyword"))
 
 keywords_n_papers <- papers_keywords_network |>
     group_by(keyword) |>
     summarise(n_papers=n()) |> 
     mutate(freq=n_papers/n_papers_pubmed) 
 
+# very important for the correct order of the keywords based on categories.
+papers_keywords_network$keyword <- factor(papers_keywords_network$keyword,
+                                          levels=unique(papers_keywords_network$keyword[order(papers_keywords_network$category,
+                                                                                              papers_keywords_network$keyword)]))
 
 # create a matrix class spMatrix (handles better sparse matrices) to do inverse table multiplication
 papers_keywords_matrix <- spMatrix(nrow=length(unique(papers_keywords_network$PMID)),
@@ -267,12 +264,39 @@ keywords_heatmap_long <- as.data.frame(as.matrix(keywords_heatmap)) |>
     filter(count!=0,colname!=rowname) |> 
     na.omit()
 
+colnames(keywords_heatmap_long) <- c("from","to","count")
+
+keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count, 
+                                       breaks=c(0,5,50, 100, 500, 800, 1000),
+                                       labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
+
+# assign the order levels of the count_bin
+keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),
+                                          levels=rev(levels(keywords_heatmap_long$count_bin)))
+
+## add the categories for the keywords
+keywords_heatmap_long <- keywords_heatmap_long %>% 
+    left_join(trends_categories_only, by=c("from"="keyword")) %>% 
+    left_join(trends_categories_only, by=c("to"="keyword"))
+
+# add the order based on the categories so they appear in that order
+#keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, 
+#                                     levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x,
+#                                                                                      keywords_heatmap_long$from)]))
+#keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, 
+#                                   levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y,
+#                                                                                  keywords_heatmap_long$to)]))
+
 ######################################### Network analysis ###########################################
 
-coword_graph <- graph_from_adjacency_matrix(as.matrix(keywords_heatmap),weighted=T, mode="undirected")
+colnames(trends_counts) <- c("name","category","abstracts" )
 
-coword_graph <- simplify(coword_graph,remove.loops=T)
+keywords_heatmap_long_net <- keywords_heatmap_long |>
+    filter(count!=0, from!=to)
 
+coword_graph <- graph_from_data_frame(keywords_heatmap_long_net, directed=FALSE, vertices=trends_counts)
+
+V(coword_graph)$color <- V(coword_graph)$category
 ### Centralities calculation
 
 V(coword_graph)$Degree <- degree(coword_graph)
@@ -282,42 +306,65 @@ V(coword_graph)$closeness <- closeness(coword_graph)
 V(coword_graph)$transitivity <- transitivity(coword_graph,type="local", weights=E(coword_graph)$weight)
 V(coword_graph)$page_rank <- page_rank(coword_graph)$vector
 
-E(coword_graph)$link_width <- as_tibble(round(log(E(coword_graph)$weight),2)) |> 
-    mutate(value=if_else(value==0,0.5,value)) |>
-    mutate(value=value/max(value)) |>
-    pull(value)
+E(coword_graph)$link_width <- as_tibble(round(log(E(coword_graph)$count),2)) %>% mutate(value=if_else(value==0,0.5,value)) %>% mutate(value=value/max(value)) %>% pull(value)
 
 layout_circle <- layout_in_circle(coword_graph)
 layout_fr <- layout_with_fr(coword_graph)
 layout_nice <- layout_nicely(coword_graph)
 
-
 coword_graph_tidy <- as_tbl_graph(coword_graph)
 
-p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
-        geom_edge_link(aes(edge_color=weight))+
-        scale_edge_color_continuous(low="gray90", high="gray20")+
-#        scale_edge_colour_continuous(low = "white", high = "black" na.value = "grey50")+
-#        geom_node_text(aes(label = name), , repel = TRUE)+
-        geom_node_point(aes(size=Degree), colour="darkgoldenrod")+
-        coord_fixed()+
-        theme_graph()
+#p <- ggraph(coword_graph_tidy,layout = 'linear', circular = TRUE) +
+#p <- p + geom_node_text(aes(label = name),repel = TRUE)#, nudge_x = p$data$x * .15, nudge_y = p$data$y * 25)
+#p <- ggraph(coword_graph_tidy,layout = "centrality",cent = graph.strength(coword_graph_tidy)) +
 
-p <- p + geom_node_text(aes(label = name),
-                        nudge_x = p$data$x * .15,
-                        nudge_y = p$data$y * .15)
+p <- ggraph(coword_graph_tidy,layout = 'stress') +
+        geom_edge_link(aes(edge_color=count,
+                           edge_width = count))+
+        geom_node_point(aes(size=Degree,
+                            shape=category,
+                            color=category))+
+        scale_edge_color_continuous(low="#bdbdbd",
+                                    high="#636363")+
+        geom_node_text(aes(color=category,
+                           label = name),
+                       fontface = "bold",
+                       nudge_y = 0.1,
+                       check_overlap = TRUE,
+                       show.legend=FALSE)+
+#        scale_color_manual(values=c("gut microbiome"="#e66101","flux"="#5e3c99","proteomics"="#bababa","medical"="#fdb863"))+
+        scale_size(range = c(0.5,6),
+                   breaks=c(5,15,25))+
+        scale_edge_width(range = c(0.1,2))+
+        guides(edge_color= guide_legend("# of co-occurrence\nin abstracts",order = 3),
+               edge_width=guide_legend("# of co-occurrence\nin abstracts",order = 3), 
+               shape=guide_legend("Compound",order = 1),
+               color=guide_legend("Compound",order = 1), 
+               size=guide_legend("Keywords co-occurrences\n(degree)",
+                                 order = 2,
+                                 override.aes = list(color="gray50")))+
+        theme_graph()+
+        coord_cartesian(clip = "off")+
+        theme(legend.justification = "top",
+              legend.box="horizontal",
+              legend.direction= "vertical",
+              legend.margin=margin(unit(0.4,"cm")),
+              legend.position = "bottom",
+              legend.spacing.x=unit(1.5,"cm"),
+              legend.title = element_text(size = 15),
+              legend.text = element_text(size = 14),
+              legend.key.size = unit(0.8,"cm"))
 
-ggsave(paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network.png"),
+ggsave(paste0("../plots/",
+              user_prefix,"_",
+              format(Sys.time(),"%Y%m%d%H%M"),"_net.png"),
        plot = p,
        width = 25,
        height = 25,
-       units='cm' ,
+       units='cm',
        device = "png",
        dpi = 300)
 
-#png(file=paste0("../plots/", user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_network_circular.png"), width = 25, height = 25, units='cm',res=300)
-#plot(coword_graph, vertex.label=V(coword_graph)$name, vertex.size=V(coword_graph)$degree, vertex.label.cex=.9,vertex.color= "lightblue", vertex.frame.color="white", edge.size=E(coword_graph)$weights, layout=layout_circle)
-#dev.off()
 
 ######################################### Heatmap plotting ###########################################
 
