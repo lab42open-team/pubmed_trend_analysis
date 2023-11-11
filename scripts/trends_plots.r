@@ -40,19 +40,33 @@ user_prefix <- args[2]
 
 trends_pubmed <- read_delim(args[1], delim="\t", col_names=F,col_types = cols())
 
-colnames(trends_pubmed) <- c("year","PMID","keyword")
+colnames(trends_pubmed) <- c("year","PMID","synonym")
 
 trends_categories <- read_delim(args[3], delim="\t", col_names=F,col_types = cols()) |> arrange(X3)
+colnames(trends_categories) <- c("synonym","keyword","category")
+
+trends_categories_only <- trends_categories |> distinct(keyword,category)
+## filter only the keywords that are listed in the trends_categories and then
+## join them to keep the general categories. Also remove the the synonyms to
+## keep only the unique number of PMIDs per keyword.
+
+trends_pubmed <- trends_pubmed |>
+    filter(synonym %in% trends_categories$synonym) |> 
+    dplyr::left_join(trends_categories, by=c("synonym"="synonym")) |> 
+    dplyr::distinct(year,PMID,keyword,category)
+
 ## bar plot of keyword frequencies
 
 trends_counts <- trends_pubmed |>
-    distinct(PMID,keyword) |>
-    group_by(keyword) |>
-    summarise(counts=n())
+    distinct(PMID,keyword,category) |>
+    group_by(keyword,category) |>
+    summarise(counts=n(), .groups="keep")
+
+trends_counts$keyword <- fct_reorder(trends_counts$keyword,trends_counts$category)
 
 pubmed_keyword_frequency <- ggplot()+
     geom_col(data=trends_counts,
-             aes(x=keyword,y=counts),
+             aes(x=keyword,y=counts, fill=category),
              width=0.8)+
     geom_text(data=trends_counts,
               aes(x=keyword,y=counts,label=counts),
@@ -74,14 +88,38 @@ ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),
 
 
 ## trends per year
+keywords_per_year <- trends_pubmed %>% 
+    distinct(PMID, keyword,category,year) %>% 
+    group_by(year, keyword,category) %>% 
+    summarize(counts=n()) %>% 
+    ungroup() %>% 
+    arrange(year) %>% 
+    group_by(keyword,category) %>% 
+    mutate(cumulative_counts=cumsum(counts)) %>% 
+    ungroup() %>% 
+    mutate(keyword=fct_reorder(keyword,category, .desc=TRUE)) %>% 
+    mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 2000, max(counts,na.rm=T)),
+                         labels=c("1-10","10-50", "50-100", "100-500","500-2000","2000<")))
+
 keywords_per_year <- trends_pubmed |>
-    distinct(PMID, keyword,year) |>
-    group_by(year, keyword) |>
+    distinct(PMID, keyword,category, year) |>
+    group_by(year, keyword, category) |>
     summarize(counts=n(),.groups="keep") |>
     ungroup() |>
     arrange(year) |>
-    group_by(keyword) |>
-    mutate(cumulative_counts=cumsum(counts))
+    group_by(keyword, category) |>
+    mutate(cumulative_counts=cumsum(counts)) |>
+    ungroup() |> 
+#    mutate(keyword=fct_reorder(keyword, category, .desc=TRUE)) |>
+    mutate(count_bin=cut(counts, breaks=c(0,10, 50, 100, 500, 2000, max(counts,na.rm=T)),
+                         labels=c("1-10","10-50", "50-100", "100-500","500-2000","2000<")))
+
+
+# change the order to descreasing to appear with alphabetical order
+keywords_per_year$keyword <- factor(keywords_per_year$keyword,
+                                    levels=unique(keywords_per_year$keyword[order(keywords_per_year$category,
+                                                                                  keywords_per_year$keyword,
+                                                                                  decreasing=T)]))
 
 # the article ID is a line in the pubmed files so it is the foundation of our analysis. We run the distinct function to eliminate possible duplicated lines.
 
@@ -89,12 +127,17 @@ pubmed_keyword_per_year <- ggplot()+
     geom_line(data=keywords_per_year,
               aes(x=year,y=counts, color=keyword),
               show.legend=T)+
-    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),
-                       limits=c(min(keywords_per_year$year,na.rm=T),2020))+
+    scale_x_continuous(n.breaks=6,
+                       limits=c(min(keywords_per_year$year,na.rm=T),max(keywords_per_year$year, na.rm=T)))+
+    scale_y_continuous(n.breaks=5)+
     ggtitle("Occurrences of keywords per year")+
     theme_bw()
     
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year.png"),
+ggsave(paste0("../plots/",
+              user_prefix,"_",
+              format(Sys.time(),
+                     "%Y-%m-%d_%H-%M"),
+              "_pubmed_keyword_per_year.png"),
        plot = pubmed_keyword_per_year,
        device = "png",
        dpi = 150)
@@ -104,17 +147,87 @@ pubmed_keyword_per_year_cumulative <- ggplot()+
     geom_line(data=keywords_per_year,
               aes(x=year,y=cumulative_counts, color=keyword),
               show.legend=T)+
-    scale_x_continuous(breaks=seq(min(keywords_per_year$year, na.rm=T),2020,10),
-                       limits=c(min(keywords_per_year$year,na.rm=T),2020))+
+    scale_x_continuous(n.breaks=6,
+                       limits=c(min(keywords_per_year$year,na.rm=T),max(keywords_per_year$year, na.rm=T)))+
     ggtitle("Cumulative occurrences of keywords per year")+
     theme_bw()
    
-ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_per_year_cumulative.png"),
+ggsave(paste0("../plots/",
+              user_prefix,"_",format(Sys.time(), "%Y-%m-%d_%H-%M"),
+              "_pubmed_keyword_per_year_cumulative.png"),
        plot = pubmed_keyword_per_year_cumulative,
        device = "png",
        dpi = 150)
 
 ################################## Heatmaps #############################
+
+############################## timeline heatmap #########################
+
+pubmed_keyword_per_year_heatmap <- ggplot()+
+    geom_tile(data=keywords_per_year,
+              aes(x=year,y=keyword,
+                  fill=count_bin,
+                  height=1,
+                  width=1),
+              color="white",
+              show.legend=T)+
+    scale_x_continuous(n.breaks=10)+
+    scale_y_discrete(labels = function(x) str_wrap(x, width = 35))+
+    scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
+    ylab("")+
+    xlab("")+
+    coord_equal()+
+    theme_bw()+
+    guides(fill=guide_legend(title="# of abstracts"))+
+    theme(panel.border=element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor=element_blank(),
+          legend.position="bottom",
+          legend.direction="horizontal",
+          legend.key.height=unit(0.2,"cm"),
+          legend.key.width = unit(0.8,"cm"),
+          axis.text.y = element_text(size = 9),
+          plot.margin=margin(0,0,0,0,"cm"))
+   
+ggsave(paste0("../plots/",
+              user_prefix,"_",
+              format(Sys.time(), "%Y%m%d%H%M"),
+              "_key_time_heatmap.png"),
+       plot=pubmed_keyword_per_year_heatmap,
+       width = 45,
+       height = 15,
+       units='cm',
+       device = "png",
+       dpi = 300)
+
+##### with facet of categories
+key_time_heatmap_facet <- ggplot(data=keywords_per_year)+
+    geom_tile(aes(x=year,y=keyword, fill=count_bin),size=0.2,color="white", show.legend=T)+
+    scale_x_continuous(expand=c(0,0),limits=c(1960,2022),breaks=seq(1960,2030,5))+
+#    scale_y_discrete(expand=c(0,0),limits = rev(levels(keywords_per_year$keyword)))+
+    scale_fill_manual(values=c("#dadaeb","#bcbddc","#9e9ac8","#807dba","#6a51a3","#4a1486"))+
+    ylab("")+
+    xlab("")+
+    theme_bw()+
+    guides(fill=guide_legend(title="# of abstracts"))+
+    theme(plot.background=element_blank(),
+          panel.border=element_blank(), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor=element_blank(), 
+          legend.position="right",legend.direction="vertical",
+          legend.key.height=unit(0.8,"cm"),
+          legend.key.width = unit(0.2,"cm"),
+          plot.margin=margin(0.1,0.2,0.2,0.2,"cm"),
+          axis.text=element_text(size=10),
+          strip.text.y = element_text(angle =0,size=9),
+          strip.background = element_rect(colour = "white", fill = "white") ,
+          aspect.ratio = 1) +
+    facet_grid(rows = vars(category),space = "free",scales = "free_y",labeller = labeller(category = label_wrap_gen(9)))
+   
+ggsave(paste0("../plots/", user_prefix,"_",format(Sys.time(), "%Y%m%d%H%M"),"_key_time_heatmap_facet.png"), 
+       plot =key_time_heatmap_facet ,height=12, width = 30, units='cm',device = "png", dpi = 300)
+
+
 
 # create the edglist of keywords and PMID's
 papers_keywords_network <- trends_pubmed |>
