@@ -183,7 +183,7 @@ pubmed_keyword_per_year_heatmap <- ggplot()+
    
 ggsave(paste0("../plots/",
               user_prefix,"_",
-              format(Sys.time(), "%Y%m%d%H%M"),
+              format(Sys.time(), "%Y-%m-%d_%H-%M"),
               "_key_time_heatmap.png"),
        plot=pubmed_keyword_per_year_heatmap,
        width = 45,
@@ -202,7 +202,7 @@ key_time_heatmap_facet <- pubmed_keyword_per_year_heatmap +
    
 ggsave(paste0("../plots/",
               user_prefix,"_",
-              format(Sys.time(), "%Y%m%d%H%M"),
+              format(Sys.time(),"%Y-%m-%d_%H-%M"),
               "_key_time_heatmap_facet.png"), 
        plot=key_time_heatmap_facet,
        height=12,
@@ -344,7 +344,7 @@ p <- ggraph(coword_graph_tidy,layout = 'stress') +
 
 ggsave(paste0("../plots/",
               user_prefix,"_",
-              format(Sys.time(),"%Y%m%d%H%M"),"_net.png"),
+              format(Sys.time(),"%Y-%m-%d_%H-%M"),"_net.png"),
        plot = p,
        width = 25,
        height = 25,
