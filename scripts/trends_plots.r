@@ -24,6 +24,7 @@ suppressPackageStartupMessages({
     library(Matrix) # version Matrix 1.2-15
     library(igraph)
     library(ggraph)
+    library(pheatmap)
     library(tidygraph)
 })
 
@@ -81,7 +82,10 @@ pubmed_keyword_frequency <- ggplot()+
           panel.grid.major.x = element_blank(),
           panel.grid.minor=element_blank())
 
-ggsave(paste0("../plots/",user_prefix,"_", format(Sys.time(), "%Y-%m-%d_%H-%M"),"_pubmed_keyword_frequency.png"),
+ggsave(paste0("../plots/",
+              user_prefix,"_",
+              format(Sys.time(), "%Y-%m-%d_%H-%M"),
+              "_pubmed_keyword_frequency.png"),
        plot = pubmed_keyword_frequency,
        device = "png",
        dpi = 150)
@@ -270,6 +274,8 @@ keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count,
                                        breaks=c(0,5,50, 100, 500, 800, 1000),
                                        labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
 
+keywords_heatmap_long$count_n <- cut(keywords_heatmap_long$count, breaks=10)
+
 # assign the order levels of the count_bin
 keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),
                                           levels=rev(levels(keywords_heatmap_long$count_bin)))
@@ -278,14 +284,7 @@ keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$cou
 keywords_heatmap_long <- keywords_heatmap_long %>% 
     left_join(trends_categories_only, by=c("from"="keyword")) %>% 
     left_join(trends_categories_only, by=c("to"="keyword"))
-
-# add the order based on the categories so they appear in that order
-#keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, 
-#                                     levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x,
-#                                                                                      keywords_heatmap_long$from)]))
-#keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, 
-#                                   levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y,
-#                                                                                  keywords_heatmap_long$to)]))
+ 
 
 ######################################### Network analysis ###########################################
 
@@ -368,17 +367,55 @@ ggsave(paste0("../plots/",
 
 ######################################### Heatmap plotting ###########################################
 
+keywords_heatmap_wide <- as.data.frame(as.matrix(keywords_heatmap)) 
+
+diag(keywords_heatmap_wide) <- 0
+
+png(paste0("../plots/",
+           user_prefix,"_",
+           format(Sys.time(),"%Y-%m-%d_%H-%M"),
+           "_heatmap.png"),
+    res=300,unit="cm",height=30,width=30)
+
+pheatmap(keywords_heatmap_wide,
+         cluster_cols=F,
+         cluster_rows=F,
+         color=colorRampPalette(c("white","gray","skyblue","gold", "palevioletred3"))(30))
+
+dev.off() 
+
 # elements of the plot
 
-# we defined here the diagonal because the raw values don't include them. In addition we need the diagonal seperate from the raw data because we will paint it differently
-keywords <- unique(c(keywords_heatmap_long$colname,keywords_heatmap_long$rowname))
-diagonal <- tibble(rowname=keywords,colname=keywords,count=-1,jaccard=0) 
+keywords <- trends_categories |>
+    filter(keyword %in% unique(c(keywords_heatmap_long$from,
+                                 keywords_heatmap_long$to))) |>
+    mutate(from=factor(keyword,
+                       levels=as.character(unique(keyword)))) |>
+    mutate(to=factor(keyword,
+                     levels=as.character(unique(unique(keyword)))),
+           count=0,
+           count_bin="0",
+           jaccard=0) |>
+    dplyr::select(from,to,count,count_bin)
+
+diagonal <- tibble(from=factor(keywords$from,
+                               levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x,keywords_heatmap_long$from)])),
+                   to=factor(keywords$to,
+                                   levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y,
+                                                                                  keywords_heatmap_long$to)])),
+                   count=-1,
+                   jaccard=0) 
+
+# we defined here the diagonal because the raw values don't include them.
+# In addition we need the diagonal seperate from the raw data because we will paint it differently
 
 ## summaries to dynamically set the break points and limits of the plot
 
 summary <- summary(keywords_heatmap_long$count)
 
-## For the heatmap we need breaks to define the specific points of the legend and limits to ensure that all values will be included in the plot. To create breaks and limits and make them scalable we used the base R functions summary and quantile.
+## For the heatmap we need breaks to define the specific points of the legend
+## and limits to ensure that all values will be included in the plot.
+## To create breaks and limits and make them scalable we used the base R functions summary and quantile.
 ## also quantiles because the raw counts are far apart
 
 quantile <- as.vector(quantile(keywords_heatmap_long$count,probs = c(50,90, 95,98)/100)) # big probabilities because of order of magnitude difference of values 
@@ -392,45 +429,53 @@ breaks <- c(floor(min(summary)),
 
 limits=c(min(breaks),max(breaks))
 
-g <- guide_legend("no of abstracts") # legend title and combination of different colors and shapes into one legend
+# add the order based on the categories so they appear in that order
+keywords_heatmap_long$from <- factor(keywords_heatmap_long$from, 
+                                     levels = unique(keywords_heatmap_long$from[order(keywords_heatmap_long$category.x,
+                                                                                      keywords_heatmap_long$from)]))
+keywords_heatmap_long$to <- factor(keywords_heatmap_long$to, 
+                                   levels = unique(keywords_heatmap_long$to[order(keywords_heatmap_long$category.y,
+                                                                                  keywords_heatmap_long$to)]))
+
 
 # running the plot
+
+g <- guide_legend("no of abstracts") # legend title and combination of different colors and shapes into one legend
+keywords_heatmap_long <- keywords_heatmap_long %>% filter(!is.na(count_bin))
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,
-            aes(x=colname, 
-                y=rowname,
-                fill=count),
-            alpha=0,
+            aes(x=from,
+                y=to,
+                fill=count_bin),
+            alpha=1,
+            show.legend = T)+
+  geom_tile(data=keywords_heatmap_long,
+            aes(x=from, y=from),
+            fill="white",
+            alpha=1,
             show.legend = F)+
-  geom_point(data=keywords_heatmap_long,
-             aes(x=colname,
-                 y=rowname,
-                 colour = count,
-                 size=count))  +
-  scale_size(name="co-occurrence",
-             range = c(0.5, 10),
-             breaks=breaks,limits=limits)+
-  scale_colour_gradientn(colours =c("steelblue1","yellowgreen","yellow","goldenrod1","orange"),
-                         breaks=breaks,
-                         limits=limits) +
-  geom_point(data=diagonal,
-             aes(x=colname, y=rowname),
-             colour="lightyellow4",
-             size=1,
-             show.legend = F)+
+  geom_point(data=keywords_heatmap_long,aes(x=from, y=from, color="gray50"),alpha=1, show.legend = F)+
+#  scale_fill_manual(values=c("#d73027","#fc8d59","#fee090","#4575b4","#91bfdb","#e0f3f8","white")) + #,breaks=breaks,limits=limits) +
+  scale_color_manual(values=c("gray80"))+
   scale_x_discrete(position = "top")+
-  guides(colour = g, size = g)+
-  ggtitle("Heatmap of co-occurrence of keywords")+
+  scale_y_discrete(limits = rev(levels(keywords_heatmap_long$to)))+
+  guides(fill = guide_legend("# of abstracts"), color=FALSE)+
   xlab("") +
   ylab("")+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 0),legend.position = c(.85, .25))
+  theme(plot.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor=element_blank(),
+        text = element_text(size=17), 
+        axis.text.x = element_text(angle = 90, hjust = 0),
+        legend.position = c(.90, .83))
 
-ggsave(paste0("../plots/",
+  ggsave(paste0("../plots/",
               user_prefix,"_",
               format(Sys.time(),
                      "%Y-%m-%d_%H-%M"),
-              "_pubmed_keyword_heatmap.png"),
+              "_heatmap2.png"),
        plot = pubmed_keyword_coocurrence_heatmap,
        device = "png",
        dpi = 150)
@@ -458,14 +503,14 @@ g_log <- guide_legend("log2(no of abstracts)") # legend title and combination of
 
 pubmed_keyword_coocurrence_heatmap <- ggplot()+
   geom_tile(data=keywords_heatmap_long,
-            aes(x=colname,
-                y=rowname,
+            aes(x=from,
+                y=to,
                 fill=log2),
             alpha=0,
             show.legend = F)+
   geom_point(data=keywords_heatmap_long,
-             aes(x=colname,
-                 y=rowname,
+             aes(x=from,
+                 y=to,
                  colour = log2,
                  size=log2))  +
   scale_size(name="co-occurrence",
@@ -476,8 +521,8 @@ pubmed_keyword_coocurrence_heatmap <- ggplot()+
                          breaks=breaks_log,
                          limits=limits_log) +
   geom_point(data=diagonal,
-             aes(x=colname,
-                 y=rowname),
+             aes(x=from,
+                 y=to),
              colour="lightyellow4",
              size=1,
              show.legend = F)+
@@ -504,8 +549,8 @@ ggsave(paste0("../plots/",
 ## Jaccard index is the intersection over the union. So we join for each node - keyword the total occurrencies. The join is double because we have two columns of keywords and this way is easier for the calculations
 
 keywords_heatmap_jaccard <- keywords_heatmap_long |>
-    left_join(keywords_n_papers,c("rowname"="keyword")) |> 
-    left_join(keywords_n_papers,c("colname"="keyword")) |> 
+    left_join(keywords_n_papers,c("from"="keyword")) |> 
+    left_join(keywords_n_papers,c("to"="keyword")) |> 
     mutate(jaccard_index=count/(n_papers.x+n_papers.y-count),
            random_expectation=(count/n_papers_pubmed)/(freq.x*freq.y))
 
@@ -516,16 +561,16 @@ limits<- c(0,
 
 pubmed_jaccard_heatmap <- ggplot()+ 
     geom_tile(data=keywords_heatmap_jaccard,
-              aes(x=colname,
-                  y=rowname,
+              aes(x=from,
+                  y=to,
                   fill=jaccard_index),
               alpha=1,
               show.legend = T,
               colour = "white")+
     scale_fill_gradientn(colours =colors_j,limits=limits)+
     geom_tile(data=diagonal,
-              aes(x=colname,
-                  y=rowname,
+              aes(x=from,
+                  y=to,
                   fill=count),
               show.legend = F)+
     scale_x_discrete(position = "top")+
@@ -553,15 +598,15 @@ ggsave(paste0("../plots/",
 
 pubmed_random_heatmap <- ggplot()+ 
     geom_tile(data=keywords_heatmap_jaccard,
-              aes(x=colname,
-                  y=rowname,
+              aes(x=from,
+                  y=to,
                   fill=random_expectation),
               alpha=1,
               show.legend = T,
               colour = "white")+
     geom_tile(data=diagonal,
-              aes(x=colname,
-                  y=rowname,
+              aes(x=from,
+                  y=to,
                   fill=count),
               show.legend = F)+
     scale_fill_gradient2(low = "steelblue1",
