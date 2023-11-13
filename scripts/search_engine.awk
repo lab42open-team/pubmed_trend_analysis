@@ -28,19 +28,8 @@ BEGIN {
         for (k in keywords){
             
             if (match(line,"[^[:alpha:]]" keywords[k] "[^[:alpha:]]")){
-                #matches[$1 "\t" keywords[k]]= $4 
-                print $4 "\t" $1 "\t" keywords[k]
+                print $4 "\t" $1 "\t" keywords[k] # print year  PMID    keyword
             }
         }
     }
 }
-#END{
-#
-#
-#    for (i in matches){
-#        
-#        print matches[i] "\t" i
-#
-#        }
-#
-#}
