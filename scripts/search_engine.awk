@@ -4,9 +4,10 @@
 # Run :  gunzip -c path-to-pubmed/*.tsv.gz | ./scripts/search_engine.awk keywords.txt - > results.tsv
 # Note the - , it takes the input from the pipe |
 #
+
 BEGIN {
     FS="\t"
-    }
+}
 
 # Treat keywords
 
@@ -15,6 +16,7 @@ BEGIN {
 }
 
 # Treat corpus. The input comes from the - from the execution of the script
+
 (ARGIND==2){
 
     if ( $4 ~ /[[:alnum:]]/ && $5 ~ /[[:alnum:]]/ && $6 ~ /[[:alnum:]]/) {
@@ -26,18 +28,8 @@ BEGIN {
         for (k in keywords){
             
             if (match(line,"[^[:alpha:]]" keywords[k] "[^[:alpha:]]")){
-                matches[$1 "\t" keywords[k]]= $4 #print $1 "\t" $4 "\t" keywords[k]
+                print $4 "\t" $1 "\t" keywords[k] # print year  PMID    keyword
             }
         }
     }
-}
-END{
-
-
-    for (i in matches){
-        
-        print matches[i] "\t" i
-
-        }
-
 }
