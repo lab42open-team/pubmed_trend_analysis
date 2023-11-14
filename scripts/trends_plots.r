@@ -262,8 +262,6 @@ keywords_heatmap_long$count_bin <- cut(keywords_heatmap_long$count,
                                        breaks=c(0,5,50, 100, 500, 800, 1000),
                                        labels=c("1-5","5-50", "50-100", "100-500","500-800","800<"))
 
-keywords_heatmap_long$count_n <- cut(keywords_heatmap_long$count, breaks=10)
-
 # assign the order levels of the count_bin
 keywords_heatmap_long$count_bin <- factor(as.character(keywords_heatmap_long$count_bin),
                                           levels=rev(levels(keywords_heatmap_long$count_bin)))
